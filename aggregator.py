@@ -5,21 +5,21 @@ import time
 
 import vk
 
-from util.normalizer import Normalizer
+from luckybot.util.normalizer import Normalizer
 
 
 # Функция парсинга аргументов командной строки
 def parse_args():
     parser = argparse.ArgumentParser()
-    parser.add_argument('-k', '--keywords', type=str, default='metadata/keywords.list',
+    parser.add_argument('-k', '--keywords', type=str, default='resources/keywords.list',
                         help='Path to file with keywords for search')
-    parser.add_argument('-t', '--tokens', type=str, default='metadata/access_token.list',
+    parser.add_argument('-t', '--tokens', type=str, default='resources/access_token.list',
                         help='Path to file with access tokens for VK API')
     parser.add_argument('-p', '--prefix', type=str, default='data/ds',
                         help='Prefix of file with output dataset')
     parser.add_argument('-c', '--count', type=int, default=200,
                         help='Max count of posts in result for one keyword')
-    parser.add_argument('--history', type=str, default='metadata/history.list',
+    parser.add_argument('--history', type=str, default='resources/history.list',
                         help='Path to file with handled post ids')
     parser.add_argument('-d', '--delay', type=int, default=2880,
                         help='How many minutes posts are stored in the history')
@@ -35,7 +35,7 @@ if __name__ == '__main__':
     access_token = [token.strip() for token in open(args.tokens, 'r') if token.strip()]
     # Множество идентификаторов записей, собранных на предыдущих итерациях
     history = {post.strip().split('\t')[0]: int(post.strip().split('\t')[1])
-                   for post in open(args.history, 'r') if post.strip()}
+                   for post in open(args.history, 'r') if post.strip()} if os.path.exists(args.history) else dict()
     # Удаление из истории старых записей
     for post_id in list(history):
         if abs(history[post_id] - int(time.time())) >= 60 * args.delay:
