@@ -1,12 +1,13 @@
 import argparse
-import random
+import time
 
 import vk
 
 from luckybot.util.normalizer import Normalizer
 from luckybot.util.transliterator import translit
 from luckybot.model.city import CityModel
-from luckybot.model.group import Group
+from luckybot.model.group import GroupModel
+from luckybot.model.access_token import AccessToken
 
 
 # Функция парсинга аргументов командной строки
@@ -33,10 +34,10 @@ if __name__ == '__main__':
     # Парсинг аргументов командной строки
     args = parse_args()
     begin_id = args.begin
-    group = Group()
+    group = GroupModel()
 
     # Список сервисных токенов доступа к VK API
-    access_token = [token.strip() for token in open(args.tokens, 'r') if token.strip()]
+    access_token = AccessToken(args.tokens)
     cities = CityModel.load(args.city)
     # Нормализатор текста (переводит исходный текст в нормальную форму)
     normalizer = Normalizer()
@@ -51,17 +52,19 @@ if __name__ == '__main__':
         while True:
             try:
                 # Начальный и конечный идентификаторы сообществ для запроса
-                start_id = begin_id + page * args.count
-                end_id = min(args.end + 1, start_id + args.count)
-                data = api.groups.getById(group_ids=','.join(map(str, range(start_id, end_id))), fields='members_count',
-                                          access_token=random.choice(access_token))
+                end_id = min(args.end + 1, begin_id + args.count)
+                if not begin_id < end_id:
+                    break
+                data = api.groups.getById(group_ids=','.join(map(str, range(begin_id, end_id))), fields='members_count',
+                                          access_token=access_token())
                 # Сохранение только тех сообществ, которые относятся к определенному городу
                 for current in data:
-                    begin_id = current['id']
+                    begin_id = current['id'] + 1
                     if 'members_count' not in current or current['members_count'] < args.members:
                         continue
                     group[current['id']] = cities[map(translit, normalizer.normalize(current['name']))]
                 break
             except Exception as msg:
                 print(msg)
+                time.sleep(1)
     group.save(args.output)

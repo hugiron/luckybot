@@ -1,7 +1,7 @@
 import pickle
 
 
-class Group:
+class GroupModel:
     def __init__(self):
         self.data = dict()
 

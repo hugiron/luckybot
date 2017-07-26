@@ -1,0 +1,248 @@
+{
+  "food": {
+    "title": "Еда",
+    "keywords": [],
+    "child": {
+      "japan": {
+        "title": "Суши и роллы",
+        "keywords": []
+      },
+      "pizza": {
+        "title": "Пицца",
+        "keywords": []
+      },
+      "burger": {
+        "title": "Бургеры",
+        "keywords": []
+      },
+      "sweet": {
+        "title": "Сладости",
+        "keywords": []
+      }
+    }
+  },
+  "clothes": {
+    "title": "Одежда",
+    "keywords": [],
+    "child": {
+      "man": {
+        "title": "Мужская",
+        "keywords": []
+      },
+      "woman": {
+        "title": "Женская",
+        "keywords": []
+      }
+    }
+  },
+  "sport": {
+    "title": "Спорт",
+    "keywords": [],
+    "child": {
+      "food": {
+        "title": "Питание",
+        "keywords": []
+      },
+      "inventory": {
+        "title": "Инвентарь",
+        "keywords": []
+      },
+      "subscription": {
+        "title": "Абонементы",
+        "keywords": []
+      }
+    }
+  },
+  "electronics": {
+    "title": "Электроника",
+    "keywords": [],
+    "child": {
+      "mobile": {
+        "title": "Мобильные устройства",
+        "keywords": []
+      },
+      "home": {
+        "title": "Техника для дома",
+        "keywords": []
+      },
+      "computer": {
+        "title": "Компьютеры и комплектующие",
+        "keywords": []
+      },
+      "accessory": {
+        "title": "Аксессуары",
+        "keywords": []
+      }
+    }
+  },
+  "home": {
+    "title": "Для дома",
+    "keywords": [],
+    "child": {
+      "repair": {
+        "title": "Ремонт",
+        "keywords": []
+      },
+      "interior": {
+        "title": "Интерьер",
+        "keywords": []
+      }
+    }
+  },
+  "game": {
+    "title": "Игры",
+    "keywords": [],
+    "child": {
+      "board": {
+        "title": "Настольные",
+        "keywords": []
+      },
+      "computer": {
+        "title": "Компьютерные",
+        "keywords": []
+      }
+    }
+  },
+  "game_object": {
+    "title": "Внутриигровые предметы",
+    "keywords": [],
+    "child": {
+      "dota": {
+        "title": "Dota 2",
+        "keywords": []
+      },
+      "cs_go": {
+        "title": "CS:GO",
+        "keywords": []
+      },
+      "team_fortess": {
+        "title": "Team Fortess 2",
+        "keywords": []
+      }
+    }
+  },
+  "book": {
+    "title": "Книги",
+    "keywords": []
+  },
+  "car": {
+    "title": "Авто и мото",
+    "keywords": []
+  },
+  "service": {
+    "title": "Услуги",
+    "keywords": [],
+    "child": {
+      "photo": {
+        "title": "Фото и видеосъемка",
+        "keywords": []
+      },
+      "beauty": {
+        "title": "Красота и здоровье",
+        "keywords": []
+      },
+      "edu": {
+        "title": "Обучение",
+        "keywords": []
+      },
+      "tattoo": {
+        "title": "Тату-мастер",
+        "keywords": []
+      },
+      "art": {
+        "title": "Художник",
+        "keywords": []
+      },
+      "handmade": {
+        "title": "Handmade",
+        "keywords": []
+      },
+      "holiday": {
+        "title": "Праздник",
+        "keywords": []
+      }
+    }
+  },
+  "accessory": {
+    "title": "Аксессуары",
+    "keywords": [],
+    "child": {
+      "man": {
+        "title": "Мужские",
+        "keywords": []
+      },
+      "woman": {
+        "title": "Женские",
+        "keywords": []
+      }
+    }
+  },
+  "gift": {
+    "title": "Подарки",
+    "keywords": [],
+    "child": {
+      "certificate": {
+        "title": "Сертификаты",
+        "keywords": []
+      },
+      "basket": {
+        "title": "Наборы",
+        "keywords": []
+      }
+    }
+  },
+  "entertainment": {
+    "title": "Развлечения",
+    "keywords": [],
+    "child": {
+      "quest": {
+        "title": "Квесты",
+        "keywords": []
+      },
+      "tourism": {
+        "title": "Туризм",
+        "keywords": []
+      },
+      "event": {
+        "title": "Мероприятия (концерты, театры, выставки)",
+        "keywords": []
+      },
+      "bath": {
+        "title": "Сауны, бани",
+        "keywords": []
+      },
+      "attraction": {
+        "title": "Аттракционы",
+        "keywords": []
+      }
+    }
+  },
+  "music": {
+    "title": "Музыка",
+    "keywords": [],
+    "child": {
+      "instrument": {
+        "title": "Инструменты",
+        "keywords": []
+      },
+      "attribute": {
+        "title": "Атрибутика",
+        "keywords": []
+      }
+    }
+  },
+  "product": {
+    "title": "Товары",
+    "keywords": [],
+    "child": {
+      "cosmetic": {
+        "title": "Косметика",
+        "keywords": []
+      },
+      "children": {
+        "title": "Детские",
+        "keywords": []
+      }
+    }
+  }
+}

@@ -24,6 +24,13 @@ class Normalizer:
         self.stopwords = set(nltk.corpus.stopwords.words('russian'))
         self.mystem = Mystem()
 
+        self.replace_set = [
+            ("<br>", " "),
+            ("\n", " "),
+            ("й", "и"),
+            ("ё", "е")
+        ]
+
     def normalize(self, text):
         text = self.preprocess(text)
         vk_url_count = len(self.vk_url_regex.findall(text))
@@ -36,7 +43,10 @@ class Normalizer:
                ['{date}'] * date_count + ['{vk_url}'] * vk_url_count + ['{url}'] * url_count
 
     def preprocess(self, text):
-        return text.lower().replace("<br>", " ").replace("\n", " ")
+        text = text.lower()
+        for item in self.replace_set:
+            text = text.replace(item[0], item[1])
+        return text
 
     def filter(self, lemms):
         return [lemm for lemm in lemms if lemm not in self.stopwords and lemm.isalpha() and len(lemm) > 1]

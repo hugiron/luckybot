@@ -1,3 +1,5 @@
 vk==2.0.2
-tornado==4.3
-crew==0.9.2
+tornado==4.5.1
+pykka==1.2.1
+mongoengine==0.13.0
+nltk==3.2.1

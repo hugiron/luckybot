@@ -1,11 +1,11 @@
 import argparse
 import os
-import random
 import time
 
 import vk
 
 from luckybot.util.normalizer import Normalizer
+from luckybot.model.access_token import AccessToken
 
 
 # Функция парсинга аргументов командной строки
@@ -13,13 +13,13 @@ def parse_args():
     parser = argparse.ArgumentParser()
     parser.add_argument('-k', '--keywords', type=str, default='resources/keywords.list',
                         help='Path to file with keywords for search')
-    parser.add_argument('-t', '--tokens', type=str, default='resources/access_token.list',
+    parser.add_argument('-t', '--tokens', type=str, default='objects/access_token.json',
                         help='Path to file with access tokens for VK API')
     parser.add_argument('-p', '--prefix', type=str, default='data/ds',
                         help='Prefix of file with output dataset')
     parser.add_argument('-c', '--count', type=int, default=200,
                         help='Max count of posts in result for one keyword')
-    parser.add_argument('--history', type=str, default='resources/history.list',
+    parser.add_argument('--history', type=str, default='data/history.list',
                         help='Path to file with handled post ids')
     parser.add_argument('-d', '--delay', type=int, default=2880,
                         help='How many minutes posts are stored in the history')
@@ -32,7 +32,7 @@ if __name__ == '__main__':
     # Генерация суффикса файла из текущей даты и времени
     filename = "%s_%s.list" % (args.prefix, time.strftime("%Y_%m_%d_%H:%M", time.gmtime()))
     # Список сервисных токенов доступа к VK API
-    access_token = [token.strip() for token in open(args.tokens, 'r') if token.strip()]
+    access_token = AccessToken(args.tokens)
     # Множество идентификаторов записей, собранных на предыдущих итерациях
     history = {post.strip().split('\t')[0]: int(post.strip().split('\t')[1])
                    for post in open(args.history, 'r') if post.strip()} if os.path.exists(args.history) else dict()
@@ -51,7 +51,7 @@ if __name__ == '__main__':
     with open("%s.tmp" % filename, 'w') as dataset:
         for keyword in keywords:
             # Поиск записей в новостной ленте ВКонтакте по ключевому запросу
-            data = api.newsfeed.search(q=keyword, count=args.count, access_token=random.choice(access_token))
+            data = api.newsfeed.search(q=keyword, count=args.count, access_token=access_token())
             for post in data['items']:
                 post_id = "%s_%s" % (post['owner_id'], post['id'])
                 # Если запись была оставлена от имени сообщества, не является репостом и не была ранее обработана
