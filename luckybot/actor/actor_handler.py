@@ -32,10 +32,14 @@ class ActorHandler(pykka.ThreadingActor):
         }
     """
     def parse(self, message):
-        if message['type'] == 'message_new':
-            self.pool.proxy().handle(self.message_parser.parse(message['object']['body'], message['object']['user_id']))
-        else:
-            self.pool.proxy().handle(dict(command=message['type'], user_id=message['object']['user_id']))
+        try:
+            if message['type'] == 'message_new':
+                self.pool.proxy().handle(self.message_parser.parse(message['object']['body'],
+                                                                   message['object']['user_id']))
+            else:
+                self.pool.proxy().handle(dict(command=message['type'], user_id=message['object']['user_id']))
+        except Exception as exc:
+            pass
 
     """
         Scheme:
@@ -46,13 +50,7 @@ class ActorHandler(pykka.ThreadingActor):
         }
     """
     def handle(self, message):
-        print(message)
-        self.pool.proxy().send(dict(
-            type='success',
-            data=[1,2,3,4,5],
-            attach=['wall-77270571_268223'],
-            user_id=message['user_id']
-        ))
+        pass
 
     """
         Scheme:
@@ -64,14 +62,17 @@ class ActorHandler(pykka.ThreadingActor):
         }
     """
     def send(self, message):
-        response = self.response_template.render(message['type'], message.get('data'))
-        if message:
-            try:
-                if response[0] or message.get('attach'):
-                    self.vk_api.messages.send(user_id=message['user_id'], message=response[0],
-                                              attachment=','.join(message['attach']) if 'attach' in message else '')
-                if response[1]:
-                    self.vk_api.messages.send(user_id=message['user_id'], sticker_id=response[1])
-            except Exception as msg:
-                print(msg)
-                self.pool.proxy().send(message)
+        try:
+            response = self.response_template.render(message['type'], message.get('data'))
+            if message:
+                try:
+                    if response[0] or message.get('attach'):
+                        self.vk_api.messages.send(user_id=message['user_id'], message=response[0],
+                                                  attachment=','.join(message['attach']) if 'attach' in message else '')
+                    if response[1]:
+                        self.vk_api.messages.send(user_id=message['user_id'], sticker_id=response[1])
+                except Exception as msg:
+                    print(msg)
+                    self.pool.proxy().send(message)
+        except Exception as exc:
+            pass

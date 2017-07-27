@@ -5,9 +5,6 @@ import random
 class ResponseTemplate:
     def __init__(self, templates):
         self.templates = templates
-        for key in self.templates:
-            for i in range(len(self.templates[key])):
-                self.templates[key][i] = self.templates[key][i].replace("\n", "<br>")
 
     def render(self, type, data=None):
         if type in self.templates:

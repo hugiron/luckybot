@@ -57,7 +57,7 @@ if __name__ == '__main__':
                 # Если запись была оставлена от имени сообщества, не является репостом и не была ранее обработана
                 if post_id not in history:
                     if post['owner_id'] < 0 and post['post_type'] == 'post':
-                        dataset.write("%s\t%s\n" % (post_id, normalizer.preprocess(post['text'])))
+                        dataset.write("%s\t%d\t%s\n" % (post_id, post['date'], normalizer.preprocess(post['text'])))
                     history[post_id] = int(time.time())
 
     # Перезапись файла с историей идентификаторов записей

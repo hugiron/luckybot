@@ -59,8 +59,7 @@ class CategoryModel:
                 for category in accumulator:
                     last_key = category.split(':')[0]
                     if key != last_key:
-                        #if key in current and check_seq(current):
-                        if check_seq(current):
+                        if key in current and check_seq(current):
                             result_lexem += len(current)
                             current.remove(key)
                             if current:
@@ -70,8 +69,7 @@ class CategoryModel:
                         key = last_key
                         current = list()
                     current.append(category)
-                #if key in current and check_seq(current):
-                if check_seq(current):
+                if key in current and check_seq(current):
                     result_lexem += len(current)
                     current.remove(key)
                     if current:
