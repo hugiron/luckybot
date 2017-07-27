@@ -47,6 +47,12 @@ class ActorHandler(pykka.ThreadingActor):
     """
     def handle(self, message):
         print(message)
+        self.pool.proxy().send(dict(
+            type='success',
+            data=[1,2,3,4,5],
+            attach=['wall-77270571_268223'],
+            user_id=message['user_id']
+        ))
 
     """
         Scheme:
