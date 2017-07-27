@@ -1,30 +1,28 @@
 import json
 from functools import reduce
-from luckybot.util.normalizer import Normalizer
 
 
 class CategoryModel:
     def __init__(self, data):
-        norm = Normalizer()
         self.vocab = dict()
         self.keywords = dict()
         self.categories = list()
         for first in data:
-            data[first]['name'] = set(norm.normalize(data[first]['title']))
+            data[first]['tags'] = set(data[first]['tags'])
             self.categories.append((0, first, data[first]['title']))
             self.keywords[first] = set(data[first]['keywords'])
-            for word in data[first]['name']:
+            for word in data[first]['tags']:
                 if word not in self.vocab:
                     self.vocab[word] = list()
                 self.vocab[word].append(first)
             if 'child' in data[first]:
                 for second in data[first]['child']:
                     category_id = "%s:%s" % (first, second)
-                    data[first]['child'][second]['name'] = set(norm.normalize(data[first]['child'][second]['title']))
+                    data[first]['child'][second]['tags'] = set(data[first]['child'][second]['tags'])
                     self.categories.append((1, category_id, data[first]['child'][second]['title']))
                     self.keywords[category_id] = set(data[first]['child'][second]['keywords'])
                     self.keywords[first] = self.keywords[first].union(self.keywords[category_id])
-                    for word in data[first]['child'][second]['name']:
+                    for word in data[first]['child'][second]['tags']:
                         if word not in self.vocab:
                             self.vocab[word] = list()
                         self.vocab[word].append(category_id)
@@ -61,7 +59,8 @@ class CategoryModel:
                 for category in accumulator:
                     last_key = category.split(':')[0]
                     if key != last_key:
-                        if key in current and check_seq(current):
+                        #if key in current and check_seq(current):
+                        if check_seq(current):
                             result_lexem += len(current)
                             current.remove(key)
                             if current:
@@ -71,7 +70,8 @@ class CategoryModel:
                         key = last_key
                         current = list()
                     current.append(category)
-                if key in current and check_seq(current):
+                #if key in current and check_seq(current):
+                if check_seq(current):
                     result_lexem += len(current)
                     current.remove(key)
                     if current:

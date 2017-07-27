@@ -27,7 +27,6 @@ class Normalizer:
         self.replace_set = [
             ("<br>", " "),
             ("\n", " "),
-            ("й", "и"),
             ("ё", "е")
         ]
 
