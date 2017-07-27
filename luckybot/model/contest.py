@@ -7,7 +7,6 @@ class Contest(Document):
     text = StringField(required=True)
     date = DateTimeField(required=True)
     city = ListField(IntField())
-    category = ListField(StringField())
 
     meta = {
         'collection': 'contest',
@@ -15,7 +14,6 @@ class Contest(Document):
             '#post_id',
             'date',
             'city',
-            'category',
             {
                 'fields': ['$text'],
                 'default_language': 'russian'
@@ -23,10 +21,9 @@ class Contest(Document):
         ]
     }
 
-    def __init__(self, post_id, text, date, city, category):
+    def __init__(self, post_id, text, date, city):
         super(Contest, self).__init__()
         self.post_id = post_id
         self.text = text
         self.date = date
         self.city = city
-        self.category = category

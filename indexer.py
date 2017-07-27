@@ -13,7 +13,7 @@ from luckybot.model.access_token import AccessToken
 # Функция парсинга аргументов командной строки
 def parse_args():
     parser = argparse.ArgumentParser()
-    parser.add_argument('-t', '--tokens', type=str, default='resources/access_token.list',
+    parser.add_argument('-t', '--tokens', type=str, default='objects/access_token.json',
                         help='Path to file with access tokens for VK API')
     parser.add_argument('-b', '--begin', type=int, default=1,
                         help='Begin group ID for indexer')

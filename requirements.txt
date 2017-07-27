@@ -3,3 +3,4 @@ tornado==4.5.1
 pykka==1.2.1
 mongoengine==0.13.0
 nltk==3.2.1
+pymystem3==0.1.5

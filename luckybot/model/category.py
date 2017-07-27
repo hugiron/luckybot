@@ -7,22 +7,27 @@ class CategoryModel:
     def __init__(self, data):
         norm = Normalizer()
         self.vocab = dict()
+        self.keywords = dict()
         self.categories = list()
         for first in data:
             data[first]['name'] = set(norm.normalize(data[first]['title']))
             self.categories.append((0, first, data[first]['title']))
+            self.keywords[first] = set(data[first]['keywords'])
             for word in data[first]['name']:
                 if word not in self.vocab:
                     self.vocab[word] = list()
                 self.vocab[word].append(first)
             if 'child' in data[first]:
                 for second in data[first]['child']:
+                    category_id = "%s:%s" % (first, second)
                     data[first]['child'][second]['name'] = set(norm.normalize(data[first]['child'][second]['title']))
-                    self.categories.append((1, "%s:%s" % (first, second), data[first]['child'][second]['title']))
+                    self.categories.append((1, category_id, data[first]['child'][second]['title']))
+                    self.keywords[category_id] = set(data[first]['child'][second]['keywords'])
+                    self.keywords[first] = self.keywords[first].union(self.keywords[category_id])
                     for word in data[first]['child'][second]['name']:
                         if word not in self.vocab:
                             self.vocab[word] = list()
-                        self.vocab[word].append("%s:%s" % (first, second))
+                        self.vocab[word].append(category_id)
         self.data = data
 
     def __getitem__(self, sentence):
@@ -76,6 +81,12 @@ class CategoryModel:
                 return list(result), result_lexem
 
         return parse([], norm_sentence)[0]
+
+    def get_keywords(self, category_id):
+        if isinstance(category_id, str):
+            return list(self.keywords[category_id])
+        elif isinstance(category_id, list):
+            return list(reduce(lambda x, y: x.union(y), map(lambda x: self.keywords[x], category_id)))
 
     def get_categories(self, current_categories=None):
         if isinstance(current_categories, list):
