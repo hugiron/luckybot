@@ -10,7 +10,7 @@ class GroupModel:
             self.data[key] = value
 
     def __getitem__(self, item):
-        return self.data[item]
+        return self.data[item] if item in self.data else []
 
     def save(self, filename):
         with open(filename, 'wb') as file:
