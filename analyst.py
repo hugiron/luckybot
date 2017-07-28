@@ -31,66 +31,76 @@ def parse_args():
 
 
 def parse_date(post, publish_date):
-    current_datetime = datetime.datetime.now()
-
-    def check_datetime(date):
-        return date > current_datetime
-
     def datetime_from_weekday(weekday):
-        date = publish_date + datetime.timedelta(days=weekday + 7 - publish_date.weekday()
-                                                 if weekday <= publish_date.weekday()
-                                                 else weekday - publish_date.weekday())
-        return date - datetime.timedelta(hours=publish_date.hour, minutes=publish_date.minute,
-                                         seconds=publish_date.second, microseconds=publish_date.microsecond)
+        try:
+            date = publish_date + datetime.timedelta(days=weekday + 7 - publish_date.weekday()
+                                                     if weekday <= publish_date.weekday()
+                                                     else weekday - publish_date.weekday())
+            return date - datetime.timedelta(hours=publish_date.hour, minutes=publish_date.minute,
+                                             seconds=publish_date.second, microseconds=publish_date.microsecond)
+        except:
+            return None
 
     def datetime_from_full_date(date):
-        day, month, year = map(int, date.split('.'))
-        if year < 2000:
-            year += 2000
-        return datetime.date(day=day, month=month, year=year)
+        try:
+            day, month, year = map(int, date.split('.'))
+            if year < 2000:
+                year += 2000
+            return datetime.date(day=day, month=month, year=year)
+        except:
+            return None
 
     def datetime_from_short_date(date):
-        day, month = map(int, date.split('.'))
-        year = publish_date.year
-        date = datetime.date(day=day, month=month, year=year)
-        if publish_date > date:
-            date = datetime.date(day=day, month=month, year=year + 1)
-        return date
+        try:
+            day, month = map(int, date.split('.'))
+            year = publish_date.year
+            date = datetime.date(day=day, month=month, year=year)
+            if publish_date > date:
+                date = datetime.date(day=day, month=month, year=year + 1)
+            return date
+        except:
+            return None
 
     text = ''.join(post)
     for i, month in enumerate(months):
-        text = text.replace(month, ".%d" % i)
+        text = text.replace(month, ".%d" % (i + 1))
     result = [date for date in full_date_regex.findall(text.replace(' ', '')) if '.' in date]
     if result:
-        result = datetime_from_full_date(result[-1])
-        return result if check_datetime(result) else None
+        for item in result:
+            date = datetime_from_full_date(item)
+            if date:
+                return date
 
     result = short_date_regex.findall(text.replace(' ', ''))
     if result:
-        result = datetime_from_short_date(result[-1])
-        return result if check_datetime(result) else None
+        for item in result:
+            date = datetime_from_short_date(item)
+            if date:
+                return date
 
     result = [weekdays[word] for word in post if word in weekdays]
     if result:
-        result = datetime_from_weekday(result[-1])
-        return result if check_datetime(result) else None
+        for item in result:
+            date = datetime_from_weekday(item)
+            if date:
+                return date
 
     return None
 
 
 def classifier(filename):
-    current_date = datetime.datetime.now()
-    with open(filename, 'r') as file:
-        for post in file:
+    current_date = datetime.datetime.now().date()
+    with open(filename, 'r') as file_corpus:
+        for post in file_corpus:
             try:
                 if not post.strip():
                     continue
-                post_id, publish_date, text = post.strip().split()
+                post_id, publish_date, text = post.strip().split('\t')
                 if model.classify(normalizer.normalize(text), args.alpha)[0] >= args.threshold:
                     date = parse_date(post=normalizer.mystem.lemmatize(text),
-                                      publish_date=datetime.datetime.fromtimestamp(int(publish_date)))
+                                      publish_date=datetime.datetime.fromtimestamp(int(publish_date)).date())
                     if date and date > current_date:
-                        contest = Contest(post_id, text, date, group[int(post_id.split('_')[0][1:])])
+                        contest = Contest(post_id, text, date, group[int(post_id.split('_')[0][1:])], [])
                         contest.save()
             except Exception as msg:
                 print(msg)
@@ -124,5 +134,10 @@ if __name__ == '__main__':
             filter(lambda x: x.startswith(args.prefix) and x.endswith('.list'), os.listdir(args.folder))))
     for file in files:
         os.rename(file, "%s.tmp" % file)
-    with mp.Pool(min(mp.cpu_count(), len(files)), initializer=initializer) as pool:
-        pool.map(classifier, files)
+    files = ["%s.tmp" % file for file in files]
+    if len(files) > 1:
+        with mp.Pool(min(mp.cpu_count(), len(files)), initializer=initializer) as pool:
+            pool.map(classifier, files)
+    elif files:
+        initializer()
+        classifier(files[0])
