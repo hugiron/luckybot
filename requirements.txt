@@ -2,5 +2,7 @@ vk==2.0.2
 tornado==4.5.1
 pykka==1.2.1
 mongoengine==0.13.0
+motor==1.1
 nltk==3.2.1
 pymystem3==0.1.5
+asyncmc==0.6.5

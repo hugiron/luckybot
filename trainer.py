@@ -13,7 +13,7 @@ def parse_args():
                         help='Filename with rejected documents')
     parser.add_argument('-o', '--output', type=str, default='objects/bayes.model',
                         help='Path to file with Naive Bayes model')
-    parser.add_argument('--min_count', type=int, default=10,
+    parser.add_argument('--min_count', type=int, default=20,
                         help='The minimum count of times a bigram is to meet')
     parser.add_argument('--threshold', type=int, default=5,
                         help='Score threshold for forming the phrases (higher means fewer phrases)')
@@ -24,5 +24,5 @@ if __name__ == '__main__':
     args = parse_args()
     bigram = gensim.models.Phrases([item.strip().split() for item in open(args.accepted, 'r') if item.strip()],
                                    min_count=args.min_count, threshold=args.threshold)
-    model = NaiveBayesModel([args.accepted, args.rejected], bigram=bigram, bernoulli=True)
+    model = NaiveBayesModel([args.accepted, args.rejected], bigram=bigram, bernoulli=False)
     model.save(args.output)

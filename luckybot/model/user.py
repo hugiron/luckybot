@@ -4,8 +4,6 @@ from mongoengine.fields import ListField, IntField, BooleanField, StringField
 
 class User(Document):
     user_id = IntField(required=True)
-    is_active = BooleanField(required=True, default=True)
-    is_banned = BooleanField(required=True, default=False)
     is_member = BooleanField(required=True)
     city = ListField(IntField())
     category = ListField(StringField())
@@ -21,12 +19,10 @@ class User(Document):
         ]
     }
 
-    def __init__(self, user_id, city, category, gift, is_member, is_active=True, is_banned=False):
+    def __init__(self, user_id, city, category, gift, is_member):
         super(User, self).__init__()
         self.user_id = user_id
         self.city = city
         self.category = category
         self.gift = gift
         self.is_member = is_member
-        self.is_active = is_active
-        self.is_banned = is_banned

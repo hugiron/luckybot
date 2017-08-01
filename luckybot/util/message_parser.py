@@ -84,12 +84,9 @@ class MessageParser:
 
         result = dict(user_id=user_id)
         if command:
-            if target and (command[0] == 'add' or command[0] == 'delete'):
+            if target and command[-1] != target:
                 command.append(target)
-            else:
-                target = None
             result['command'] = '_'.join(command)
-        if data:
-            result['data'] = {target: data} if target else data
+        result['data'] = ({target: data} if target else data) if data else None
 
         return result

@@ -2,9 +2,10 @@ import pickle
 
 
 class CityModel:
-    def __init__(self):
+    def __init__(self, title=None):
         self.id = None
         self.city = dict()
+        self.title = title
 
     def add(self, city, id):
         if not city:
@@ -13,6 +14,12 @@ class CityModel:
             if city[0] not in self.city:
                 self.city[city[0]] = CityModel()
             self.city[city[0]].add(city[1:], id)
+
+    def get_title(self, id):
+        return self.title.get(id)
+
+    def exist(self, id):
+        return id in self.title
 
     def __getitem__(self, item):
         result = list()
@@ -30,10 +37,12 @@ class CityModel:
 
     @staticmethod
     def build(source):
-        if isinstance(source, str):
-            source = {city: int(line.split('\t')[0]) for line in open(source, 'r') if line.strip()
-                      for city in line.strip().split('\t')[1].split('|')}
-        current = CityModel()
+        if not isinstance(source, str):
+            return CityModel()
+        title = {int(line.split('\t')[0]): line.split('\t')[1] for line in open(source, 'r') if line.strip()}
+        source = {city: int(line.split('\t')[0]) for line in open(source, 'r') if line.strip()
+                  for city in line.strip().split('\t')[2].split('|')}
+        current = CityModel(title)
         for city, id in source.items():
             current.add(city.split(), id)
         return current

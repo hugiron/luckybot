@@ -23,9 +23,9 @@ def parse_args():
                         help='Path to Naive Bayes model')
     parser.add_argument('-g', '--group', type=str, default='objects/group.model',
                         help='Path to model with pairs from group_id and city_id')
-    parser.add_argument('-t', '--threshold', type=float, default=0.99,
+    parser.add_argument('-t', '--threshold', type=float, default=0.9,
                         help='Threshold value for the classifier')
-    parser.add_argument('-a', '--alpha', type=float, default=1,
+    parser.add_argument('-a', '--alpha', type=float, default=100,
                         help='Smoothing factor for the classifier')
     return parser.parse_args()
 
@@ -64,28 +64,15 @@ def parse_date(post, publish_date):
     text = ''.join(post)
     for i, month in enumerate(months):
         text = text.replace(month, ".%d" % (i + 1))
-    result = [date for date in full_date_regex.findall(text.replace(' ', '')) if '.' in date]
-    if result:
-        for item in result:
-            date = datetime_from_full_date(item)
-            if date:
-                return date
 
-    result = short_date_regex.findall(text.replace(' ', ''))
-    if result:
-        for item in result:
-            date = datetime_from_short_date(item)
-            if date:
-                return date
+    full_date = [date for date in full_date_regex.findall(text.replace(' ', '')) if '.' in date]
+    short_date = short_date_regex.findall(text.replace(' ', ''))
+    weekday_date = [weekdays[word] for word in post if word in weekdays]
 
-    result = [weekdays[word] for word in post if word in weekdays]
-    if result:
-        for item in result:
-            date = datetime_from_weekday(item)
-            if date:
-                return date
-
-    return None
+    dates = filter(lambda x: x, list(map(datetime_from_full_date, full_date)) +
+                   list(map(datetime_from_short_date, short_date)) +
+                   list(map(datetime_from_weekday, weekday_date)))
+    return min(dates) if dates else None
 
 
 def classifier(filename):
@@ -103,7 +90,7 @@ def classifier(filename):
                         contest = Contest(post_id, text, date, group[int(post_id.split('_')[0][1:])], [])
                         contest.save()
             except Exception as msg:
-                print(msg)
+                pass
     os.remove(filename)
 
 
