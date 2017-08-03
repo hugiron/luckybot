@@ -56,8 +56,9 @@ class ActorHandler(pykka.ThreadingActor):
     @tornado.gen.coroutine
     def handle(self, message):
         try:
-            msg = yield self.handler.handlers[message['command']](message['user_id'], message['data'])
-            self.pool.proxy().send(msg)
+            if message['command'] in self.handler.handlers:
+                msg = yield self.handler.handlers[message['command']](message['user_id'], message.get('data'))
+                self.pool.proxy().send(msg)
         except Exception as exc:
             pass
 

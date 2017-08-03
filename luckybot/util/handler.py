@@ -1,4 +1,5 @@
 import vk
+from collections import Counter
 
 
 class Handler:
@@ -17,6 +18,9 @@ class Handler:
         self.vk_api = vk.API(session, v='5.67', lang='ru')
 
         self.handlers = dict(
+            add=self.add,
+            delete=self.delete,
+            show=self.show,
             group_join=self.group_join,
             group_leave=self.group_leave,
             show_contest=self.show_contest,
@@ -26,6 +30,13 @@ class Handler:
             show_city=self.show_city,
             show_category=self.show_category,
             show_gift=self.show_gift,
+            contest=self.show_contest,
+            contest_city=self.show_contest_city,
+            contest_category=self.show_contest_category,
+            contest_gift=self.show_contest_gift,
+            city=self.show_city,
+            category=self.show_category,
+            gift=self.show_gift,
             add_city=self.add_city,
             add_category=self.add_category,
             add_gift=self.add_gift,
@@ -74,6 +85,24 @@ class Handler:
             user_id=user_id
         )
 
+    async def add(self, user_id, data):
+        return dict(
+            type='help_add',
+            user_id=user_id
+        )
+
+    async def delete(self, user_id, data):
+        return dict(
+            type='help_delete',
+            user_id=user_id
+        )
+
+    async def show(self, user_id, data):
+        return dict(
+            type='help_show',
+            user_id=user_id
+        )
+
     async def add_city(self, user_id, data):
         user_city = await self.mc.get(self.city_keyword(user_id))
         if not user_city:
@@ -84,10 +113,10 @@ class Handler:
             if city not in user_city:
                 user_city.add(city)
                 count += 1
-        await self.db.user.update({'user_id': user_id}, {'$set': {'city': user_city}}, upsert=False)
+        await self.db.user.update({'user_id': user_id}, {'$set': {'city': list(user_city)}}, upsert=False)
         await self.mc.set(self.city_keyword(user_id), user_city)
         return dict(
-            type='help_add_city' if not count else ('add_city' if count == 1 else 'add_cities'),
+            type='not_add_city' if not count else ('add_city' if count == 1 else 'add_cities'),
             user_id=user_id
         )
 
@@ -98,19 +127,26 @@ class Handler:
             user_category = set(user['category'])
         count = 0
         data['category'].sort()
+        main_categories = set()
         for category in data['category']:
             if category not in user_category:
                 user_category.add(category)
-                if ':' not in category:
+                if ':' in category:
+                    main_categories.add(category.split(':')[0])
+                else:
                     for item in self.category.data[category]['child']:
                         key = "%s:%s" % (category, item)
                         if key not in user_category:
                             user_category.add(key)
                 count += 1
-        await self.db.user.update({'user_id', user_id}, {'$set': {'category': user_category}}, upsert=False)
+        counter = Counter(map(lambda x: x.split(':')[0], user_category))
+        for category in main_categories:
+            if counter[category] == len(self.category.data[category]['child']):
+                user_category.add(category)
+        await self.db.user.update({'user_id': user_id}, {'$set': {'category': list(user_category)}}, upsert=False)
         await self.mc.set(self.category_keyword(user_id), user_category)
         return dict(
-            type='help_add_category' if not count else ('add_category' if count == 1 else 'add_categories'),
+            type='not_add_category' if not count else ('add_category' if count == 1 else 'add_categories'),
             user_id=user_id
         )
 
@@ -124,10 +160,10 @@ class Handler:
             if gift not in user_gift:
                 user_gift.add(gift)
                 count += 1
-        await self.db.user.update({'user_id', user_id}, {'$set': {'gift': user_gift}}, upsert=False)
+        await self.db.user.update({'user_id': user_id}, {'$set': {'gift': list(user_gift)}}, upsert=False)
         await self.mc.set(self.gift_keyword(user_id), user_gift)
         return dict(
-            type='help_add_gift' if not count else ('add_gift' if count == 1 else 'add_gifts'),
+            type='not_add_gift' if not count else ('add_gift' if count == 1 else 'add_gifts'),
             user_id=user_id
         )
 
@@ -141,10 +177,10 @@ class Handler:
             if city in user_city:
                 user_city.remove(city)
                 count += 1
-        await self.db.user.update({'user_id': user_id}, {'$set': {'city': user_city}}, upsert=False)
+        await self.db.user.update({'user_id': user_id}, {'$set': {'city': list(user_city)}}, upsert=False)
         await self.mc.set(self.city_keyword(user_id), user_city)
         return dict(
-            type='help_delete_city' if not count else ('delete_city' if count == 1 else 'delete_cities'),
+            type='not_delete_city' if not count else ('delete_city' if count == 1 else 'delete_cities'),
             user_id=user_id
         )
 
@@ -168,10 +204,10 @@ class Handler:
                             user_category.remove(key)
                     user_category.remove(category)
                 count += 1
-        await self.db.user.update({'user_id', user_id}, {'$set': {'category': user_category}}, upsert=False)
+        await self.db.user.update({'user_id': user_id}, {'$set': {'category': list(user_category)}}, upsert=False)
         await self.mc.set(self.category_keyword(user_id), user_category)
         return dict(
-            type='help_delete_category' if not count else ('delete_category' if count == 1 else 'delete_categories'),
+            type='not_delete_category' if not count else ('delete_category' if count == 1 else 'delete_categories'),
             user_id=user_id
         )
 
@@ -185,10 +221,10 @@ class Handler:
             if gift in user_gift:
                 user_gift.remove(gift)
                 count += 1
-        await self.db.user.update({'user_id', user_id}, {'$set': {'gift': user_gift}}, upsert=False)
+        await self.db.user.update({'user_id': user_id}, {'$set': {'gift': list(user_gift)}}, upsert=False)
         await self.mc.set(self.gift_keyword(user_id), user_gift)
         return dict(
-            type='help_delete_gift' if not count else ('delete_gift' if count == 1 else 'delete_gifts'),
+            type='not_delete_gift' if not count else ('delete_gift' if count == 1 else 'delete_gifts'),
             user_id=user_id
         )
 

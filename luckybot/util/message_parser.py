@@ -10,7 +10,7 @@ class MessageParser:
 
         self.grammar = dict(
             main=dict(
-                next={'show', 'add', 'delete', 'help'}
+                next={'show', 'add', 'delete', 'help', 'contest', 'city', 'category', 'gift'}
             ),
             show=dict(
                 keywords={'pokazyvat', 'poluchat', 'napisat', 'davat', 'posmotret', 'prosmatrivat', 'prosmotr',
@@ -38,7 +38,7 @@ class MessageParser:
                 keywords={'kategoriya', 'klass', 'razdel', 'tip'}
             ),
             gift=dict(
-                keywords={'podarok', 'priz', 'dar', 'vyigrysh', 'nagrada', 'trofej', 'dobycha'}
+                keywords={'priz', 'dar', 'vyigrysh', 'nagrada', 'trofej', 'dobycha'}
             )
         )
 
