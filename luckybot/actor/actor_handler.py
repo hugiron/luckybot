@@ -1,3 +1,4 @@
+import traceback
 import tornado.ioloop
 import tornado.gen
 import pykka
@@ -8,7 +9,8 @@ from luckybot.util.handler import Handler
 
 
 class ActorHandler(pykka.ThreadingActor):
-    def __init__(self, pool, group, city, category, access_token, response_template, group_id, db, mc):
+    def __init__(self, pool, group, city, category, access_token, response_template, group_id, max_contest_count,
+                 max_contest_days, db, mc):
         super(ActorHandler, self).__init__()
         self.pool = pool
         self.group = group
@@ -17,11 +19,14 @@ class ActorHandler(pykka.ThreadingActor):
         self.access_token = access_token
         self.response_template = response_template
         self.group_id = group_id
+        self.max_contest_count = max_contest_count
+        self.max_contest_days = max_contest_days
         self.db = db
         self.mc = mc
 
         self.message_parser = MessageParser(self.city, self.category)
-        self.handler = Handler(self.db, self.mc, self.city, self.category, self.group_id)
+        self.handler = Handler(self.db, self.mc, self.city, self.category, self.group_id, self.max_contest_count,
+                               self.max_contest_days)
 
         self.vk_session = vk.Session(access_token=access_token)
         self.vk_api = vk.API(self.vk_session, v='5.65', lang='ru')
@@ -43,7 +48,8 @@ class ActorHandler(pykka.ThreadingActor):
             else:
                 self.pool.proxy().handle(dict(command=message['type'], user_id=message['object']['user_id'], data=None))
         except Exception as exc:
-            pass
+            print("Parse exception: %s" % str(exc))
+            traceback.print_exc()
 
     """
         Scheme:
@@ -60,7 +66,8 @@ class ActorHandler(pykka.ThreadingActor):
                 msg = yield self.handler.handlers[message['command']](message['user_id'], message.get('data'))
                 self.pool.proxy().send(msg)
         except Exception as exc:
-            pass
+            print("Handle exception: %s" % str(exc))
+            traceback.print_exc()
 
     """
         Scheme:
@@ -87,4 +94,5 @@ class ActorHandler(pykka.ThreadingActor):
                         print(msg)
                         self.pool.proxy().send(message)
         except Exception as exc:
-            pass
+            print("Send exception: %s" % str(exc))
+            traceback.print_exc()

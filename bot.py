@@ -25,6 +25,8 @@ tornado.options.define('access_token')
 tornado.options.define('secret_key')
 tornado.options.define('group_id')
 tornado.options.define('confirmation_code')
+tornado.options.define('max_contest_count')
+tornado.options.define('max_contest_days')
 
 tornado.options.define('city')
 tornado.options.define('category')
@@ -68,6 +70,8 @@ class Application(tornado.web.Application):
             group=GroupModel.load(tornado.options.options.group),
             response_template=ResponseTemplate.load(tornado.options.options.response_template),
             group_id=tornado.options.options.group_id,
+            max_contest_count=int(tornado.options.options.max_contest_count),
+            max_contest_days=int(tornado.options.options.max_contest_days),
             db=self.motor_client[tornado.options.options.mongo_database],
             mc=self.mc
         )

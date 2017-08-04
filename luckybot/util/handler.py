@@ -1,14 +1,18 @@
 import vk
+import random
+import datetime
 from collections import Counter
 
 
 class Handler:
-    def __init__(self, db, mc, city, category, group_id):
+    def __init__(self, db, mc, city, category, group_id, max_contest_count, max_contest_days):
         self.db = db
         self.mc = mc
         self.city = city
         self.category = category
         self.group_id = group_id
+        self.max_contest_count = max_contest_count
+        self.max_contest_days = max_contest_days
 
         self.city_keyword = lambda user_id: "city_%d" % user_id
         self.category_keyword = lambda user_id: "category_%d" % user_id
@@ -274,4 +278,78 @@ class Handler:
         pass
 
     async def show_contest_gift(self, user_id, data):
-        pass
+        user_city = await self.mc.get(self.city_keyword(user_id))
+        if not user_city:
+            user = await self.get_or_create_user(user_id)
+            user_city = set(user['city'])
+            await self.mc.set(self.city_keyword(user_id), user_city)
+        if data['gift']:
+            user_gift = data['gift']
+        else:
+            user_gift = await self.mc.get(self.gift_keyword(user_id))
+            if not user_gift:
+                user = await self.get_or_create_user(user_id)
+                user_gift = set(user['gift'])
+                await self.mc.set(self.gift_keyword(user_id), user_gift)
+        random.shuffle(user_gift)
+        current_date = datetime.datetime.now()
+        current_date -= datetime.timedelta(hours=current_date.hour, minutes=current_date.minute,
+                                           seconds=current_date.second, microseconds=current_date.microsecond)
+        contest = await self.db.contest.aggregate(
+            [
+                {
+                    '$match':
+                        {
+                            '$and':
+                                [
+                                    {
+                                        'date':
+                                            {
+                                                '$gte': current_date
+                                            }
+                                    },
+                                    {
+                                        'date':
+                                            {
+                                                '$lt': current_date + datetime.timedelta(days=self.max_contest_days)
+                                            }
+                                    },
+                                    {
+                                        '$text':
+                                            {
+                                                '$search': ' '.join(user_gift),
+                                                '$language': 'ru'
+                                            }
+                                    },
+                                    {
+                                        '$or': [
+                                            {
+                                                'city':
+                                                    {
+                                                        '$size': 0
+                                                    }
+                                            },
+                                            {
+                                                'city':
+                                                    {
+                                                        '$in': user_city
+                                                    }
+                                            }
+                                        ]
+                                    }
+                                ]
+                        }
+                },
+                {
+                    '$sample':
+                        {
+                            'size': self.max_contest_count
+                        }
+                }
+            ]
+        )
+        return dict(
+            type='show_contest_gift',
+            user_id=user_id,
+            data=list(map(lambda x: 'https://vk.com/wall%s' % contest['post_id'], contest))
+        )
