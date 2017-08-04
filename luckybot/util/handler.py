@@ -1,4 +1,5 @@
 import vk
+import sys
 import random
 import datetime
 from collections import Counter
@@ -49,6 +50,24 @@ class Handler:
             delete_gift=self.delete_gift,
             help=self.help
         )
+
+    @staticmethod
+    def render_contest(contest):
+        def eq_date(first, second):
+            return first.year == second.year and first.month == second.month and first.day == second.day
+
+        def date_to_str(date):
+            return '%d.%d.%d' % (date.day, date.month, date.year)
+
+        if not contest:
+            return []
+        contest.sort(key=lambda item: item['date'])
+        result = list()
+        for index, item in enumerate(contest):
+            if not index or not eq_date(item['date'], contest[index - 1]['date']):
+                result.append('<br>Розыгрыши от %s:' % date_to_str(item['date']))
+            result.append('https://vk.com/wall%s' % item['post_id'])
+        return result
 
     async def get_or_create_user(self, user_id):
         try:
@@ -269,21 +288,151 @@ class Handler:
         )
 
     async def show_contest(self, user_id, data):
-        pass
+        search_engine = [self.search_contest_category, self.search_contest_random, self.search_contest_gift]
+        index = random.randint(0, sys.maxsize) % 3
+        contest = await search_engine[index](user_id, None)
+        if not contest:
+            contest = await search_engine[index - 1](user_id, None)
+            if not contest:
+                contest = await search_engine[index - 2](user_id, None)
+        return dict(
+            type='show_contest' if contest else 'not_show_contest',
+            user_id=user_id,
+            data=Handler.render_contest(contest)
+        )
 
-    async def show_contest_city(self, user_id, data):
-        pass
-
-    async def show_contest_category(self, user_id, data):
-        pass
-
-    async def show_contest_gift(self, user_id, data):
+    async def search_contest_random(self, user_id, data):
         user_city = await self.mc.get(self.city_keyword(user_id))
         if not user_city:
             user = await self.get_or_create_user(user_id)
             user_city = set(user['city'])
             await self.mc.set(self.city_keyword(user_id), user_city)
-        if data['gift']:
+        current_date = datetime.datetime.now()
+        current_date -= datetime.timedelta(hours=current_date.hour, minutes=current_date.minute,
+                                           seconds=current_date.second, microseconds=current_date.microsecond)
+        cursor = self.db.contest.aggregate(
+            [
+                {
+                    '$match':
+                        {
+                            '$and':
+                                [
+                                    {'date': {'$gte': current_date}},
+                                    {'date': {'$lt': current_date + datetime.timedelta(days=self.max_contest_days)}},
+                                    {
+                                        '$or': [
+                                            {'city': {'$size': 0}},
+                                            {'city': {'$in': list(user_city)}}
+                                        ]
+                                    }
+                                ]
+                        }
+                },
+                {'$sample': {'size': self.max_contest_count}}
+            ]
+        )
+        contest = list()
+        while await cursor.fetch_next:
+            contest.append(cursor.next_object())
+        return contest
+
+    async def show_contest_city(self, user_id, data):
+        if data:
+            user_city = data['city']
+        else:
+            user_city = await self.mc.get(self.city_keyword(user_id))
+            if not user_city:
+                user = await self.get_or_create_user(user_id)
+                user_city = set(user['city'])
+                await self.mc.set(self.city_keyword(user_id), user_city)
+        current_date = datetime.datetime.now()
+        current_date -= datetime.timedelta(hours=current_date.hour, minutes=current_date.minute,
+                                           seconds=current_date.second, microseconds=current_date.microsecond)
+        cursor = self.db.contest.aggregate(
+            [
+                {
+                    '$match':
+                        {
+                            '$and':
+                                [
+                                    {'date': {'$gte': current_date}},
+                                    {'date': {'$lt': current_date + datetime.timedelta(days=self.max_contest_days)}},
+                                    {'city': {'$in': list(user_city)}}
+                                ]
+                        }
+                },
+                {'$sample': {'size': self.max_contest_count}}
+            ]
+        )
+        contest = list()
+        while await cursor.fetch_next:
+            contest.append(cursor.next_object())
+        return dict(
+            type='show_contest' if contest else 'not_show_contest',
+            user_id=user_id,
+            data=Handler.render_contest(contest)
+        )
+
+    async def search_contest_category(self, user_id, data):
+        user_city = await self.mc.get(self.city_keyword(user_id))
+        if not user_city:
+            user = await self.get_or_create_user(user_id)
+            user_city = set(user['city'])
+            await self.mc.set(self.city_keyword(user_id), user_city)
+        if data:
+            user_category = data['category']
+        else:
+            user_category = await self.mc.get(self.category_keyword(user_id))
+            if not user_category:
+                user = await self.get_or_create_user(user_id)
+                user_category = set(user['category'])
+                await self.mc.set(self.category_keyword(user_id), user_category)
+            user_category = list(user_category)
+        current_date = datetime.datetime.now()
+        current_date -= datetime.timedelta(hours=current_date.hour, minutes=current_date.minute,
+                                           seconds=current_date.second, microseconds=current_date.microsecond)
+        cursor = self.db.contest.aggregate(
+            [
+                {
+                    '$match':
+                        {
+                            '$and':
+                                [
+                                    {'date': {'$gte': current_date}},
+                                    {'date': {'$lt': current_date + datetime.timedelta(days=self.max_contest_days)}},
+                                    {'category': {'$in': user_category}},
+                                    {
+                                        '$or': [
+                                            {'city': {'$size': 0}},
+                                            {'city': {'$in': list(user_city)}}
+                                        ]
+                                    }
+                                ]
+                        }
+                },
+                {'$sample': {'size': self.max_contest_count}}
+            ]
+        )
+        contest = list()
+        while await cursor.fetch_next:
+            contest.append(cursor.next_object())
+        return contest
+
+    async def show_contest_category(self, user_id, data):
+        contest = self.search_contest_category(user_id, data)
+        return dict(
+            type='show_contest' if contest else 'not_show_contest',
+            user_id=user_id,
+            data=Handler.render_contest(contest)
+        )
+
+    async def search_contest_gift(self, user_id, data):
+        user_city = await self.mc.get(self.city_keyword(user_id))
+        if not user_city:
+            user = await self.get_or_create_user(user_id)
+            user_city = set(user['city'])
+            await self.mc.set(self.city_keyword(user_id), user_city)
+        if data:
             user_gift = data['gift']
         else:
             user_gift = await self.mc.get(self.gift_keyword(user_id))
@@ -291,29 +440,20 @@ class Handler:
                 user = await self.get_or_create_user(user_id)
                 user_gift = set(user['gift'])
                 await self.mc.set(self.gift_keyword(user_id), user_gift)
+            user_gift = list(user_gift)
         random.shuffle(user_gift)
         current_date = datetime.datetime.now()
         current_date -= datetime.timedelta(hours=current_date.hour, minutes=current_date.minute,
                                            seconds=current_date.second, microseconds=current_date.microsecond)
-        contest = await self.db.contest.aggregate(
+        cursor = self.db.contest.aggregate(
             [
                 {
                     '$match':
                         {
                             '$and':
                                 [
-                                    {
-                                        'date':
-                                            {
-                                                '$gte': current_date
-                                            }
-                                    },
-                                    {
-                                        'date':
-                                            {
-                                                '$lt': current_date + datetime.timedelta(days=self.max_contest_days)
-                                            }
-                                    },
+                                    {'date': {'$gte': current_date}},
+                                    {'date': {'$lt': current_date + datetime.timedelta(days=self.max_contest_days)}},
                                     {
                                         '$text':
                                             {
@@ -323,33 +463,25 @@ class Handler:
                                     },
                                     {
                                         '$or': [
-                                            {
-                                                'city':
-                                                    {
-                                                        '$size': 0
-                                                    }
-                                            },
-                                            {
-                                                'city':
-                                                    {
-                                                        '$in': user_city
-                                                    }
-                                            }
+                                            {'city': {'$size': 0}},
+                                            {'city': {'$in': list(user_city)}}
                                         ]
                                     }
                                 ]
                         }
                 },
-                {
-                    '$sample':
-                        {
-                            'size': self.max_contest_count
-                        }
-                }
+                {'$sample': {'size': self.max_contest_count}}
             ]
         )
+        contest = list()
+        while await cursor.fetch_next:
+            contest.append(cursor.next_object())
+        return contest
+
+    async def show_contest_gift(self, user_id, data):
+        contest = self.search_contest_gift(user_id, data)
         return dict(
-            type='show_contest_gift',
+            type='show_contest' if contest else 'not_show_contest',
             user_id=user_id,
-            data=list(map(lambda x: 'https://vk.com/wall%s' % contest['post_id'], contest))
+            data=Handler.render_contest(contest)
         )
