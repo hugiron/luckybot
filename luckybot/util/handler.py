@@ -130,13 +130,15 @@ class Handler:
         user_city = await self.mc.get(self.city_keyword(user_id))
         if not user_city:
             user = await self.get_or_create_user(user_id)
-            user_city = set(user['city'])
+            user_city = user['city']
+        user_city = set(user_city)
         count = 0
         for city in data['city']:
             if city not in user_city:
                 user_city.add(city)
                 count += 1
-        await self.db.user.update({'user_id': user_id}, {'$set': {'city': list(user_city)}}, upsert=False)
+        user_city = list(user_city)
+        await self.db.user.update({'user_id': user_id}, {'$set': {'city': user_city}}, upsert=False)
         await self.mc.set(self.city_keyword(user_id), user_city)
         return dict(
             type='not_add_city' if not count else ('add_city' if count == 1 else 'add_cities'),
@@ -147,7 +149,8 @@ class Handler:
         user_category = await self.mc.get(self.category_keyword(user_id))
         if not user_category:
             user = await self.get_or_create_user(user_id)
-            user_category = set(user['category'])
+            user_category = user['category']
+        user_category = set(user_category)
         count = 0
         data['category'].sort()
         main_categories = set()
@@ -166,7 +169,8 @@ class Handler:
         for category in main_categories:
             if counter[category] == len(self.category.data[category]['child']):
                 user_category.add(category)
-        await self.db.user.update({'user_id': user_id}, {'$set': {'category': list(user_category)}}, upsert=False)
+        user_category = list(user_category)
+        await self.db.user.update({'user_id': user_id}, {'$set': {'category': user_category}}, upsert=False)
         await self.mc.set(self.category_keyword(user_id), user_category)
         return dict(
             type='not_add_category' if not count else ('add_category' if count == 1 else 'add_categories'),
@@ -177,13 +181,15 @@ class Handler:
         user_gift = await self.mc.get(self.gift_keyword(user_id))
         if not user_gift:
             user = await self.get_or_create_user(user_id)
-            user_gift = set(user['gift'])
+            user_gift = user['gift']
+        user_gift = set(user_gift)
         count = 0
         for gift in data['gift']:
             if gift not in user_gift:
                 user_gift.add(gift)
                 count += 1
-        await self.db.user.update({'user_id': user_id}, {'$set': {'gift': list(user_gift)}}, upsert=False)
+        user_gift = list(user_gift)
+        await self.db.user.update({'user_id': user_id}, {'$set': {'gift': user_gift}}, upsert=False)
         await self.mc.set(self.gift_keyword(user_id), user_gift)
         return dict(
             type='not_add_gift' if not count else ('add_gift' if count == 1 else 'add_gifts'),
@@ -194,13 +200,15 @@ class Handler:
         user_city = await self.mc.get(self.city_keyword(user_id))
         if not user_city:
             user = await self.get_or_create_user(user_id)
-            user_city = set(user['city'])
+            user_city = user['city']
+        user_city = set(user_city)
         count = 0
         for city in data['city']:
             if city in user_city:
                 user_city.remove(city)
                 count += 1
-        await self.db.user.update({'user_id': user_id}, {'$set': {'city': list(user_city)}}, upsert=False)
+        user_city = list(user_city)
+        await self.db.user.update({'user_id': user_id}, {'$set': {'city': user_city}}, upsert=False)
         await self.mc.set(self.city_keyword(user_id), user_city)
         return dict(
             type='not_delete_city' if not count else ('delete_city' if count == 1 else 'delete_cities'),
@@ -211,7 +219,8 @@ class Handler:
         user_category = await self.mc.get(self.category_keyword(user_id))
         if not user_category:
             user = await self.get_or_create_user(user_id)
-            user_category = set(user['category'])
+            user_category = user['category']
+        user_category = set(user_category)
         count = 0
         for category in data['category']:
             if category in user_category:
@@ -227,7 +236,8 @@ class Handler:
                             user_category.remove(key)
                     user_category.remove(category)
                 count += 1
-        await self.db.user.update({'user_id': user_id}, {'$set': {'category': list(user_category)}}, upsert=False)
+        user_category = list(user_category)
+        await self.db.user.update({'user_id': user_id}, {'$set': {'category': user_category}}, upsert=False)
         await self.mc.set(self.category_keyword(user_id), user_category)
         return dict(
             type='not_delete_category' if not count else ('delete_category' if count == 1 else 'delete_categories'),
@@ -238,13 +248,15 @@ class Handler:
         user_gift = await self.mc.get(self.gift_keyword(user_id))
         if not user_gift:
             user = await self.get_or_create_user(user_id)
-            user_gift = set(user['gift'])
+            user_gift = user['gift']
+        user_gift = set(user_gift)
         count = 0
         for gift in data['gift']:
             if gift in user_gift:
                 user_gift.remove(gift)
                 count += 1
-        await self.db.user.update({'user_id': user_id}, {'$set': {'gift': list(user_gift)}}, upsert=False)
+        user_gift = list(user_gift)
+        await self.db.user.update({'user_id': user_id}, {'$set': {'gift': user_gift}}, upsert=False)
         await self.mc.set(self.gift_keyword(user_id), user_gift)
         return dict(
             type='not_delete_gift' if not count else ('delete_gift' if count == 1 else 'delete_gifts'),
@@ -255,7 +267,7 @@ class Handler:
         user_city = await self.mc.get(self.city_keyword(user_id))
         if not user_city:
             user = await self.get_or_create_user(user_id)
-            user_city = set(user['city'])
+            user_city = user['city']
             await self.mc.set(self.city_keyword(user_id), user_city)
         return dict(
             type='show_city',
@@ -267,7 +279,7 @@ class Handler:
         user_category = await self.mc.get(self.category_keyword(user_id))
         if not user_category:
             user = await self.get_or_create_user(user_id)
-            user_category = set(user['category'])
+            user_category = user['category']
             await self.mc.set(self.category_keyword(user_id), user_category)
         return dict(
             type='show_category',
@@ -279,7 +291,7 @@ class Handler:
         user_gift = await self.mc.get(self.gift_keyword(user_id))
         if not user_gift:
             user = await self.get_or_create_user(user_id)
-            user_gift = set(user['gift'])
+            user_gift = user['gift']
             await self.mc.set(self.gift_keyword(user_id), user_gift)
         return dict(
             type='show_gift',
@@ -305,7 +317,7 @@ class Handler:
         user_city = await self.mc.get(self.city_keyword(user_id))
         if not user_city:
             user = await self.get_or_create_user(user_id)
-            user_city = set(user['city'])
+            user_city = user['city']
             await self.mc.set(self.city_keyword(user_id), user_city)
         current_date = datetime.datetime.now()
         current_date -= datetime.timedelta(hours=current_date.hour, minutes=current_date.minute,
@@ -322,7 +334,7 @@ class Handler:
                                     {
                                         '$or': [
                                             {'city': {'$size': 0}},
-                                            {'city': {'$in': list(user_city)}}
+                                            {'city': {'$in': user_city}}
                                         ]
                                     }
                                 ]
@@ -343,7 +355,7 @@ class Handler:
             user_city = await self.mc.get(self.city_keyword(user_id))
             if not user_city:
                 user = await self.get_or_create_user(user_id)
-                user_city = set(user['city'])
+                user_city = user['city']
                 await self.mc.set(self.city_keyword(user_id), user_city)
         current_date = datetime.datetime.now()
         current_date -= datetime.timedelta(hours=current_date.hour, minutes=current_date.minute,
@@ -357,7 +369,7 @@ class Handler:
                                 [
                                     {'date': {'$gte': current_date}},
                                     {'date': {'$lt': current_date + datetime.timedelta(days=self.max_contest_days)}},
-                                    {'city': {'$in': list(user_city)}}
+                                    {'city': {'$in': user_city}}
                                 ]
                         }
                 },
@@ -377,7 +389,7 @@ class Handler:
         user_city = await self.mc.get(self.city_keyword(user_id))
         if not user_city:
             user = await self.get_or_create_user(user_id)
-            user_city = set(user['city'])
+            user_city = user['city']
             await self.mc.set(self.city_keyword(user_id), user_city)
         if data:
             user_category = data['category']
@@ -385,9 +397,8 @@ class Handler:
             user_category = await self.mc.get(self.category_keyword(user_id))
             if not user_category:
                 user = await self.get_or_create_user(user_id)
-                user_category = set(user['category'])
+                user_category = user['category']
                 await self.mc.set(self.category_keyword(user_id), user_category)
-            user_category = list(user_category)
         current_date = datetime.datetime.now()
         current_date -= datetime.timedelta(hours=current_date.hour, minutes=current_date.minute,
                                            seconds=current_date.second, microseconds=current_date.microsecond)
@@ -404,7 +415,7 @@ class Handler:
                                     {
                                         '$or': [
                                             {'city': {'$size': 0}},
-                                            {'city': {'$in': list(user_city)}}
+                                            {'city': {'$in': user_city}}
                                         ]
                                     }
                                 ]
@@ -419,7 +430,7 @@ class Handler:
         return contest
 
     async def show_contest_category(self, user_id, data):
-        contest = self.search_contest_category(user_id, data)
+        contest = await self.search_contest_category(user_id, data)
         return dict(
             type='show_contest' if contest else 'not_show_contest',
             user_id=user_id,
@@ -430,7 +441,7 @@ class Handler:
         user_city = await self.mc.get(self.city_keyword(user_id))
         if not user_city:
             user = await self.get_or_create_user(user_id)
-            user_city = set(user['city'])
+            user_city = user['city']
             await self.mc.set(self.city_keyword(user_id), user_city)
         if data:
             user_gift = data['gift']
@@ -438,9 +449,8 @@ class Handler:
             user_gift = await self.mc.get(self.gift_keyword(user_id))
             if not user_gift:
                 user = await self.get_or_create_user(user_id)
-                user_gift = set(user['gift'])
+                user_gift = user['gift']
                 await self.mc.set(self.gift_keyword(user_id), user_gift)
-            user_gift = list(user_gift)
         random.shuffle(user_gift)
         current_date = datetime.datetime.now()
         current_date -= datetime.timedelta(hours=current_date.hour, minutes=current_date.minute,
@@ -464,7 +474,7 @@ class Handler:
                                     {
                                         '$or': [
                                             {'city': {'$size': 0}},
-                                            {'city': {'$in': list(user_city)}}
+                                            {'city': {'$in': user_city}}
                                         ]
                                     }
                                 ]
@@ -479,7 +489,7 @@ class Handler:
         return contest
 
     async def show_contest_gift(self, user_id, data):
-        contest = self.search_contest_gift(user_id, data)
+        contest = await self.search_contest_gift(user_id, data)
         return dict(
             type='show_contest' if contest else 'not_show_contest',
             user_id=user_id,
