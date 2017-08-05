@@ -19,10 +19,12 @@ class User(Document):
         ]
     }
 
-    def __init__(self, user_id, city, category, gift, is_member):
-        super(User, self).__init__()
-        self.user_id = user_id
-        self.city = city
-        self.category = category
-        self.gift = gift
-        self.is_member = is_member
+    @staticmethod
+    def create(user_id, city, category, gift, is_member):
+        user = User()
+        user.user_id = user_id
+        user.city = city
+        user.category = category
+        user.gift = gift
+        user.is_member = is_member
+        return user

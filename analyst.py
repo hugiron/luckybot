@@ -87,7 +87,7 @@ def classifier(filename):
                     date = parse_date(post=normalizer.mystem.lemmatize(text),
                                       publish_date=datetime.datetime.fromtimestamp(int(publish_date)).date())
                     if date and date > current_date:
-                        contest = Contest(post_id, text, date, group[int(post_id.split('_')[0][1:])], [])
+                        contest = Contest.create(post_id, text, date, group[int(post_id.split('_')[0][1:])], [])
                         contest.save()
             except Exception as msg:
                 pass

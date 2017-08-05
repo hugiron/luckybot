@@ -25,11 +25,13 @@ class Contest(Document):
         ]
     }
 
-    def __init__(self, post_id, text, date, city, category, is_tagged=False):
-        super(Contest, self).__init__()
-        self.post_id = post_id
-        self.text = text
-        self.date = date
-        self.city = city
-        self.category = category
-        self.is_tagged = is_tagged
+    @staticmethod
+    def create(post_id, text, date, city, category, is_tagged=False):
+        contest = Contest()
+        contest.post_id = post_id
+        contest.text = text
+        contest.date = date
+        contest.city = city
+        contest.category = category
+        contest.is_tagged = is_tagged
+        return contest
