@@ -1,5 +1,6 @@
 import argparse
 import time
+import logging
 
 import vk
 
@@ -8,6 +9,7 @@ from luckybot.util.transliterator import translit
 from luckybot.model.city import CityModel
 from luckybot.model.group import GroupModel
 from luckybot.model.access_token import AccessToken
+from luckybot.util.logger import init_logger
 
 
 # Функция парсинга аргументов командной строки
@@ -31,6 +33,7 @@ def parse_args():
 
 
 if __name__ == '__main__':
+    init_logger()
     # Парсинг аргументов командной строки
     args = parse_args()
     begin_id = args.begin
@@ -65,6 +68,6 @@ if __name__ == '__main__':
                     group[current['id']] = cities[map(translit, normalizer.normalize(current['name']))]
                 break
             except Exception as msg:
-                print(msg)
+                logging.error(str(msg))
                 time.sleep(1)
     group.save(args.output)

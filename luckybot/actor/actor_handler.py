@@ -1,8 +1,9 @@
-import traceback
+import logging
 import tornado.ioloop
 import tornado.gen
 import pykka
 import vk
+import json
 
 from luckybot.util.message_parser import MessageParser
 from luckybot.util.handler import Handler
@@ -48,8 +49,7 @@ class ActorHandler(pykka.ThreadingActor):
             else:
                 self.pool.proxy().handle(dict(command=message['type'], user_id=message['object']['user_id'], data=None))
         except Exception as exc:
-            print("Parse exception: %s" % str(exc))
-            traceback.print_exc()
+            logging.error('%s\n%s' % (str(exc), json.dumps(message)))
 
     """
         Scheme:
@@ -71,8 +71,7 @@ class ActorHandler(pykka.ThreadingActor):
                 )
             self.pool.proxy().send(msg)
         except Exception as exc:
-            print("Handle exception: %s" % str(exc))
-            traceback.print_exc()
+            logging.error('%s\n%s' % (str(exc), json.dumps(message)))
 
     """
         Scheme:
@@ -96,8 +95,7 @@ class ActorHandler(pykka.ThreadingActor):
                         self.vk_api.messages.send(user_id=message['user_id'], sticker_id=response[1])
                 except Exception as msg:
                     if msg.__dict__['error_data']['error_code'] != 901:
-                        print(msg)
+                        logging.error(str(msg))
                         self.pool.proxy().send(message)
         except Exception as exc:
-            print("Send exception: %s" % str(exc))
-            traceback.print_exc()
+            logging.error('%s\n%s' % (str(exc), json.dumps(message)))

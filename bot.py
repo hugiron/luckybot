@@ -17,6 +17,7 @@ from luckybot.model.city import CityModel
 from luckybot.model.category import CategoryModel
 from luckybot.model.group import GroupModel
 from luckybot.model.response_template import ResponseTemplate
+from luckybot.util.logger import init_logger
 
 tornado.options.define('port')
 tornado.options.define('timeout')
@@ -111,4 +112,5 @@ def main():
 
 
 if __name__ == '__main__':
+    init_logger()
     main()

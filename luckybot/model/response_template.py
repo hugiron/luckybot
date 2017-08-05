@@ -15,7 +15,7 @@ class ResponseTemplate:
                     data = '<br>'.join(map(str, data))
                 return response.replace("{% data %}", data), sticker
             else:
-                return response, sticker
+                return response.replace("{% data %}", ''), sticker
         else:
             return None
 

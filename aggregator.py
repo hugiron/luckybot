@@ -6,6 +6,7 @@ import vk
 
 from luckybot.util.normalizer import Normalizer
 from luckybot.model.access_token import AccessToken
+from luckybot.util.logger import init_logger
 
 
 # Функция парсинга аргументов командной строки
@@ -27,6 +28,7 @@ def parse_args():
 
 
 if __name__ == '__main__':
+    init_logger()
     # Парсинг аргументов командной строки
     args = parse_args()
     # Генерация суффикса файла из текущей даты и времени

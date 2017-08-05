@@ -1,7 +1,9 @@
 import os
 import re
+import json
 import argparse
 import datetime
+import logging
 import multiprocessing as mp
 from importlib.machinery import SourceFileLoader
 from mongoengine import connect
@@ -10,6 +12,7 @@ from luckybot.util.normalizer import Normalizer
 from luckybot.model.naive_bayes import NaiveBayesModel
 from luckybot.model.contest import Contest
 from luckybot.model.group import GroupModel
+from luckybot.util.logger import init_logger
 
 
 # Функция парсинга аргументов командной строки
@@ -38,8 +41,8 @@ def parse_date(post, publish_date):
                                                      else weekday - publish_date.weekday())
             return date - datetime.timedelta(hours=publish_date.hour, minutes=publish_date.minute,
                                              seconds=publish_date.second, microseconds=publish_date.microsecond)
-        except:
-            return None
+        except Exception as msg:
+            logging.error('%s\n%s' % (str(msg), json.dumps(dict(weekday=weekday))))
 
     def datetime_from_full_date(date):
         try:
@@ -47,8 +50,8 @@ def parse_date(post, publish_date):
             if year < 2000:
                 year += 2000
             return datetime.date(day=day, month=month, year=year)
-        except:
-            return None
+        except Exception as msg:
+            logging.error('%s\n%s' % (str(msg), json.dumps(dict(date=str(date)))))
 
     def datetime_from_short_date(date):
         try:
@@ -58,8 +61,8 @@ def parse_date(post, publish_date):
             if publish_date > date:
                 date = datetime.date(day=day, month=month, year=year + 1)
             return date
-        except:
-            return None
+        except Exception as msg:
+            logging.error('%s\n%s' % (str(msg), json.dumps(dict(date=str(date)))))
 
     text = ''.join(post)
     for i, month in enumerate(months):
@@ -90,7 +93,7 @@ def classifier(filename):
                         contest = Contest.create(post_id, text, date, group[int(post_id.split('_')[0][1:])], [])
                         contest.save()
             except Exception as msg:
-                pass
+                logging.error(str(msg))
     os.remove(filename)
 
 
@@ -112,6 +115,7 @@ def initializer():
 
 
 if __name__ == '__main__':
+    init_logger()
     global args, config
     # Парсинг аргументов командной строки
     args = parse_args()

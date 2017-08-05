@@ -4,6 +4,7 @@ from importlib.machinery import SourceFileLoader
 from mongoengine import connect, Q
 
 from luckybot.model.contest import Contest
+from luckybot.util.logger import init_logger
 
 
 # Функция парсинга аргументов командной строки
@@ -15,6 +16,7 @@ def parse_args():
 
 
 if __name__ == '__main__':
+    init_logger()
     args = parse_args()
     config = SourceFileLoader('*', 'server.conf').load_module()
     database = connect(db=config.mongo_database, host=config.mongo_host, port=int(config.mongo_port),
