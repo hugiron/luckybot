@@ -86,11 +86,12 @@ def classifier(filename):
                 if not post.strip():
                     continue
                 post_id, publish_date, text = post.strip().split('\t')
-                if model.classify(normalizer.normalize(text), args.alpha)[0] >= args.threshold:
+                text = normalizer.normalize(text)
+                if model.classify(text, args.alpha)[0] >= args.threshold:
                     date = parse_date(post=normalizer.mystem.lemmatize(text),
                                       publish_date=datetime.datetime.fromtimestamp(int(publish_date)).date())
                     if date and date > current_date:
-                        contest = Contest.create(post_id, text, date, group[int(post_id.split('_')[0][1:])], [])
+                        contest = Contest.create(post_id, ' '.join(text), date, group[int(post_id.split('_')[0][1:])], [])
                         contest.save()
             except Exception as msg:
                 logging.error(str(msg))

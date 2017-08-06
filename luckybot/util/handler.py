@@ -300,13 +300,15 @@ class Handler:
         )
 
     async def show_contest(self, user_id, data):
-        search_engine = [self.search_contest_category, self.search_contest_random, self.search_contest_gift]
-        index = random.randint(0, sys.maxsize) % 3
+        search_engine = [self.search_contest_category, self.search_contest_random, self.search_contest_gift, self.search_contest_random]
+        index = random.randint(0, sys.maxsize) % 4
         contest = await search_engine[index](user_id, None)
         if not contest:
             contest = await search_engine[index - 1](user_id, None)
             if not contest:
                 contest = await search_engine[index - 2](user_id, None)
+                if not contest:
+                    contest = await search_engine[index - 3](user_id, None)
         return dict(
             type='show_contest' if contest else 'not_show_contest',
             user_id=user_id,

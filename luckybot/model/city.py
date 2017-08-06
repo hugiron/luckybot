@@ -1,4 +1,4 @@
-import pickle
+import json
 
 
 class CityModel:
@@ -36,22 +36,12 @@ class CityModel:
         return result
 
     @staticmethod
-    def build(source):
-        if not isinstance(source, str):
-            return CityModel()
-        title = {int(line.split('\t')[0]): line.split('\t')[1] for line in open(source, 'r') if line.strip()}
-        source = {city: int(line.split('\t')[0]) for line in open(source, 'r') if line.strip()
-                  for city in line.strip().split('\t')[2].split('|')}
+    def load(filename):
+        with open(filename, 'r') as file:
+            cities = json.load(file)
+        title = {city['id']: city['title'] for city in cities}
+        source = {tag: city['id'] for city in cities for tag in city['tags']}
         current = CityModel(title)
         for city, id in source.items():
             current.add(city.split(), id)
         return current
-
-    def save(self, filename):
-        with open(filename, 'wb') as file:
-            pickle.dump(self, file)
-
-    @staticmethod
-    def load(filename):
-        with open(filename, 'rb') as file:
-            return pickle.load(file)

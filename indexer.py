@@ -23,7 +23,7 @@ def parse_args():
                         help='End group ID for indexer')
     parser.add_argument('--count', type=int, default=500,
                         help='Groups count of one request')
-    parser.add_argument('-c', '--city', type=str, default='objects/city.model',
+    parser.add_argument('-c', '--city', type=str, default='objects/city.json',
                         help='Path to file with binary dump cities')
     parser.add_argument('-m', '--members', type=int, default=1000,
                         help='Min count of members in group')
