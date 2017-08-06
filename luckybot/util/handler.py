@@ -4,6 +4,8 @@ import random
 import datetime
 from collections import Counter
 
+from luckybot.util.normalizer import Normalizer
+
 
 class Handler:
     def __init__(self, db, mc, city, category, group_id, max_contest_count, max_contest_days):
@@ -21,6 +23,7 @@ class Handler:
 
         session = vk.Session()
         self.vk_api = vk.API(session, v='5.67', lang='ru')
+        self.normalizer = Normalizer()
 
         self.handlers = dict(
             add=self.add,
@@ -453,6 +456,7 @@ class Handler:
                 user = await self.get_or_create_user(user_id)
                 user_gift = user['gift']
                 await self.mc.set(self.gift_keyword(user_id), user_gift)
+        user_gift = list(map(lambda item: self.normalizer.text_normalize(item), user_gift))
         random.shuffle(user_gift)
         current_date = datetime.datetime.now()
         current_date -= datetime.timedelta(hours=current_date.hour, minutes=current_date.minute,

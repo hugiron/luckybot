@@ -33,7 +33,7 @@ def parse_args():
     return parser.parse_args()
 
 
-def parse_date(post, publish_date):
+def parse_date(text, publish_date):
     def datetime_from_weekday(weekday):
         try:
             date = publish_date + datetime.timedelta(days=weekday + 7 - publish_date.weekday()
@@ -64,13 +64,12 @@ def parse_date(post, publish_date):
         except Exception as msg:
             logging.error('%s\n%s' % (str(msg), json.dumps(dict(date=str(date)))))
 
-    text = ''.join(post)
     for i, month in enumerate(months):
         text = text.replace(month, ".%d" % (i + 1))
 
     full_date = [date for date in full_date_regex.findall(text.replace(' ', '')) if '.' in date]
     short_date = short_date_regex.findall(text.replace(' ', ''))
-    weekday_date = [weekdays[word] for word in post if word in weekdays]
+    weekday_date = [weekdays[word] for word in text.split() if word in weekdays]
 
     dates = filter(lambda x: x, list(map(datetime_from_full_date, full_date)) +
                    list(map(datetime_from_short_date, short_date)) +
@@ -86,12 +85,11 @@ def classifier(filename):
                 if not post.strip():
                     continue
                 post_id, publish_date, text = post.strip().split('\t')
-                text = normalizer.normalize(text)
-                if model.classify(text, args.alpha)[0] >= args.threshold:
-                    date = parse_date(post=normalizer.mystem.lemmatize(text),
-                                      publish_date=datetime.datetime.fromtimestamp(int(publish_date)).date())
+                if model.classify(normalizer.normalize(text), args.alpha)[0] >= args.threshold:
+                    text = normalizer.text_normalize(text)
+                    date = parse_date(text=text, publish_date=datetime.datetime.fromtimestamp(int(publish_date)).date())
                     if date and date > current_date:
-                        contest = Contest.create(post_id, ' '.join(text), date, group[int(post_id.split('_')[0][1:])], [])
+                        contest = Contest.create(post_id, text, date, group[int(post_id.split('_')[0][1:])], [])
                         contest.save()
             except Exception as msg:
                 logging.error(str(msg))

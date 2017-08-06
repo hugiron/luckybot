@@ -41,6 +41,9 @@ class Normalizer:
         return self.filter(text.split()) + ['{vk_group}'] * vk_group_count + ['{vk_user}'] * vk_user_count + \
                ['{date}'] * date_count + ['{vk_url}'] * vk_url_count + ['{url}'] * url_count
 
+    def text_normalize(self, text):
+        return ''.join(self.mystem.lemmatize(self.preprocess(text))[:-1])
+
     def preprocess(self, text):
         text = text.lower()
         for item in self.replace_set:

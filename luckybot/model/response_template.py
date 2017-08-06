@@ -16,8 +16,12 @@ class ResponseTemplate:
                 return response.replace("{% data %}", data), sticker
             else:
                 return response.replace("{% data %}", ''), sticker
-        else:
-            return None
+        return None
+
+    def get_text(self, type):
+        if type in self.templates:
+            return random.choice(self.templates[type]['text'])
+        return None
 
     @staticmethod
     def load(filename):

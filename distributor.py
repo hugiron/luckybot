@@ -12,6 +12,7 @@ from luckybot.model.user import User
 from luckybot.model.response_template import ResponseTemplate
 from luckybot.model.access_token import AccessToken
 from luckybot.util.logger import init_logger
+from luckybot.util.normalizer import Normalizer
 
 
 # Функция парсинга аргументов командной строки
@@ -85,7 +86,7 @@ def search_target_contest(user, contest_city, contest_category, contest_word):
                 if post_id not in contest_city or contest_city[post_id].intersection(user.city):
                     result.add(post_id)
     for gift in user.gift:
-        keywords = list(filter(lambda x: x.isalpha() or x.isdigit(), gift.split()))
+        keywords = normalizer.text_normalize(gift).split()
         is_full = True
         for word in keywords:
             is_full &= word in contest_word
@@ -106,6 +107,9 @@ if __name__ == '__main__':
                        username=config.mongo_username, password=config.mongo_password)
     template = ResponseTemplate.load(config.response_template)
     access_token = AccessToken(args.tokens)
+
+    global normalizer
+    normalizer = Normalizer()
 
     vk_session = vk.Session(access_token=config.access_token)
     vk_api = vk.API(vk_session, v='5.65', lang='ru')
@@ -130,6 +134,8 @@ if __name__ == '__main__':
             if user_contest:
                 message = template.render('distribute_contest',
                                           list(map(lambda item: 'https://vk.com/wall%s' % item, user_contest[1:])))[0]
+                if not user.is_member:
+                    message += '<br><br>' + template.get_text('agitation')
                 vk_api.messages.send(user_id=user.user_id, message=message, attachment='wall%s' % user_contest[0])
         except Exception as msg:
             logging.error(str(msg))
