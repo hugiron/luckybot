@@ -1,5 +1,135 @@
 [
   {
+    "title": "Вена",
+    "id": 198,
+    "tags": [
+      "wien",
+      "vena"
+    ]
+  },
+  {
+    "title": "Будапешт",
+    "id": 1905655,
+    "tags": [
+      "budapesht",
+      "budapest"
+    ]
+  },
+  {
+    "title": "Рига",
+    "id": 1925340,
+    "tags": [
+      "riga"
+    ]
+  },
+  {
+    "title": "Вильнюс",
+    "id": 1932227,
+    "tags": [
+      "vilnjus",
+      "vilnius"
+    ]
+  },
+  {
+    "title": "Кишинев",
+    "id": 1710959,
+    "tags": [
+      "kishinev"
+    ]
+  },
+  {
+    "title": "Варшава",
+    "id": 1922897,
+    "tags": [
+      "warszawa",
+      "varshava"
+    ]
+  },
+  {
+    "title": "Краков",
+    "id": 2202278,
+    "tags": [
+      "krakov",
+      "krakow"
+    ]
+  },
+  {
+    "title": "Лодзь",
+    "id": 6823,
+    "tags": [
+      "lodz"
+    ]
+  },
+  {
+    "title": "Вроцлав",
+    "id": 1515655,
+    "tags": [
+      "vroclav",
+      "wroclaw"
+    ]
+  },
+  {
+    "title": "Бухарест",
+    "id": 1913559,
+    "tags": [
+      "buharest",
+      "bucuresti"
+    ]
+  },
+  {
+    "title": "Белград",
+    "id": 1950030,
+    "tags": [
+      "beograd",
+      "belgrad"
+    ]
+  },
+  {
+    "title": "Хельсинки",
+    "id": 1904869,
+    "tags": [
+      "helsinki"
+    ]
+  },
+  {
+    "title": "Загреб",
+    "id": 3173,
+    "tags": [
+      "zagreb"
+    ]
+  },
+  {
+    "title": "Прага",
+    "id": 1933924,
+    "tags": [
+      "praga",
+      "praha"
+    ]
+  },
+  {
+    "title": "Стокгольм",
+    "id": 2210985,
+    "tags": [
+      "stokgolm",
+      "stockholm"
+    ]
+  },
+  {
+    "title": "Гётеборг",
+    "id": 2480,
+    "tags": [
+      "geteborg",
+      "goteborg"
+    ]
+  },
+  {
+    "title": "Амстердам",
+    "id": 22168,
+    "tags": [
+      "amsterdam"
+    ]
+  },
+  {
     "title": "Москва",
     "id": 1,
     "tags": [
@@ -751,7 +881,7 @@
     ]
   },
   {
-    "title": "Ростов-на-Дону",
+    "title": "Ростов на Дону",
     "id": 119,
     "tags": [
       "rostov"
