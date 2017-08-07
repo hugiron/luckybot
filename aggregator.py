@@ -1,6 +1,7 @@
 import argparse
 import os
 import time
+import json
 
 import vk
 
@@ -12,7 +13,7 @@ from luckybot.util.logger import init_logger
 # Функция парсинга аргументов командной строки
 def parse_args():
     parser = argparse.ArgumentParser()
-    parser.add_argument('-k', '--keywords', type=str, default='resources/keywords.list',
+    parser.add_argument('-k', '--keywords', type=str, default='objects/keyword.json',
                         help='Path to file with keywords for search')
     parser.add_argument('-t', '--tokens', type=str, default='objects/access_token.json',
                         help='Path to file with access tokens for VK API')
@@ -43,7 +44,8 @@ if __name__ == '__main__':
         if abs(history[post_id] - int(time.time())) >= 60 * args.delay:
             del history[post_id]
     # Список ключевых слов для поиска записей
-    keywords = [keyword.strip() for keyword in open(args.keywords, 'r') if keyword.strip()]
+    with open(args.keywords, 'r') as file:
+        keywords = json.load(file)
     # Настройка подключения к VK API
     session = vk.Session()
     api = vk.API(session, v='5.65', lang='ru')
