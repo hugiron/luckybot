@@ -28,7 +28,7 @@ def parse_args():
                         help='Path to model with pairs from group_id and city_id')
     parser.add_argument('-t', '--threshold', type=float, default=0.9,
                         help='Threshold value for the classifier')
-    parser.add_argument('-a', '--alpha', type=float, default=100,
+    parser.add_argument('-a', '--alpha', type=float, default=1.5,
                         help='Smoothing factor for the classifier')
     return parser.parse_args()
 
@@ -85,10 +85,11 @@ def classifier(filename):
                 if not post.strip():
                     continue
                 post_id, publish_date, text = post.strip().split('\t')
-                if model.classify(normalizer.normalize(text), args.alpha)[0] >= args.threshold:
+                norm_text = normalizer.normalize(text)
+                if model.classify(norm_text, args.alpha)[0] >= args.threshold:
                     text = normalizer.text_normalize(text)
                     date = parse_date(text=text, publish_date=datetime.datetime.fromtimestamp(int(publish_date)).date())
-                    if date and date > current_date:
+                    if date and date > current_date and ('{vk_group}' in norm_text or '{vk_url}' in norm_text):
                         contest = Contest.create(post_id, text, date, group[int(post_id.split('_')[0][1:])], [])
                         contest.save()
             except Exception as msg:
