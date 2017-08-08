@@ -12,6 +12,7 @@ from luckybot.util.normalizer import Normalizer
 from luckybot.model.naive_bayes import NaiveBayesModel
 from luckybot.model.contest import Contest
 from luckybot.model.group import GroupModel
+from luckybot.model.group_meta import GroupMeta
 from luckybot.util.logger import init_logger
 
 
@@ -26,11 +27,22 @@ def parse_args():
                         help='Path to Naive Bayes model')
     parser.add_argument('-g', '--group', type=str, default='objects/group.model',
                         help='Path to model with pairs from group_id and city_id')
+    parser.add_argument('--group_meta', type=str, default='objects/group_meta.model',
+                        help='Path to model with approved groups and screen names')
     parser.add_argument('-t', '--threshold', type=float, default=0.9,
                         help='Threshold value for the classifier')
     parser.add_argument('-a', '--alpha', type=float, default=1.5,
                         help='Smoothing factor for the classifier')
     return parser.parse_args()
+
+
+def validate_vk_url(vk_url):
+    name = vk_url.split('/')[-1]
+    if name.startswith('id') and name[2:].isdigit():
+        return '{vk_user}'
+    elif name.startswith('club') and name[4:].isdigit():
+        return '{vk_group}'
+    return '{vk_url}'
 
 
 def parse_date(text, publish_date):
@@ -85,11 +97,13 @@ def classifier(filename):
                 if not post.strip():
                     continue
                 post_id, publish_date, text = post.strip().split('\t')
-                norm_text = normalizer.normalize(text)
+                group_id = int(post_id.split('_')[0][1:])
+                norm_text = normalizer.normalize(text, validate_vk_url)
                 if model.classify(norm_text, args.alpha)[0] >= args.threshold:
                     text = normalizer.text_normalize(text)
                     date = parse_date(text=text, publish_date=datetime.datetime.fromtimestamp(int(publish_date)).date())
-                    if date and date > current_date and ('{vk_group}' in norm_text or '{vk_url}' in norm_text):
+                    if date and date > current_date and group_meta.is_approved(group_id) and \
+                                    '{vk_group}' in norm_text and '{vk_user}' not in norm_text and '{url}' not in norm_text:
                         contest = Contest.create(post_id, text, date, group[int(post_id.split('_')[0][1:])], [])
                         contest.save()
             except Exception as msg:
@@ -98,9 +112,10 @@ def classifier(filename):
 
 
 def initializer():
-    global model, normalizer, group, database
+    global model, normalizer, group, database, group_meta
     model = NaiveBayesModel.load(args.model)
     group = GroupModel.load(args.group)
+    group_meta = GroupMeta.load(args.group_meta)
     normalizer = Normalizer()
     database = connect(db=config.mongo_database, host=config.mongo_host, port=int(config.mongo_port),
                        username=config.mongo_username, password=config.mongo_password)

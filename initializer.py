@@ -27,5 +27,3 @@ import os
 
 os.mkdir('data')
 os.mkdir('log')
-
-# Creating cron jobs

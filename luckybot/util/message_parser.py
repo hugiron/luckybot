@@ -15,7 +15,7 @@ class MessageParser:
             show=dict(
                 keywords={'pokazyvat', 'poluchat', 'napisat', 'davat', 'posmotret', 'prosmatrivat', 'prosmotr',
                           'nahodit', 'poisk', 'iskat', 'rasskazyvat', 'podelitsya', 'daya', 'prihodit', 'naidi',
-                          'prisylat'},
+                          'prisylat', 'hotet', 'zhelat', 'zhazhda', 'vozhdelat'},
                 next={'contest', 'city', 'category', 'gift'}
             ),
             add=dict(
@@ -81,6 +81,9 @@ class MessageParser:
                     target = 'gift'
                 else:
                     target = None
+
+        if target and command and command[0] == 'show':
+            command = ['show', 'contest', target]
 
         result = dict(user_id=user_id)
         if command:

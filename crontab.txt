@@ -1,0 +1,11 @@
+@daily sudo reboot
+@monthly cd ~/luckybot && python3 group_city_indexer.py
+@weekly cd ~/luckybot && python3 group_meta_indexer.py
+
+@reboot cd ~/luckybot && python3 bot.py
+
+*/15 * * * * cd ~/luckybot && python3 aggregator.py
+*/15 * * * * cd ~/luckybot && python3 analyst.py
+*/20 * * * * cd ~/luckybot && python3 category_indexer.py
+0 1 * * * cd ~/luckybot && python3 autodelete.py
+0 7 * * * cd ~/luckybot && python3 distributor.py

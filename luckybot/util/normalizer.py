@@ -30,11 +30,22 @@ class Normalizer:
             ("ё", "е")
         ]
 
-    def normalize(self, text):
+    def normalize(self, text, validate_vk_url=None):
         text = self.preprocess(text)
-        vk_url_count = len(self.vk_url_regex.findall(text))
+        vk_url_count = 0
         vk_group_count = len(self.vk_group_regex.findall(text))
         vk_user_count = len(self.vk_user_regex.findall(text))
+        if validate_vk_url:
+            for vk_url in self.vk_url_regex.findall(text):
+                url_type = validate_vk_url(vk_url)
+                if url_type == '{vk_url}':
+                    vk_url_count += 1
+                elif url_type == '{vk_group}':
+                    vk_group_count += 1
+                elif url_type == '{vk_user}':
+                    vk_user_count += 1
+        else:
+            vk_url_count = len(self.vk_url_regex.findall(text))
         url_count = len(self.url_regex.findall(text)) - vk_url_count
         text = ' '.join(self.mystem.lemmatize(self.regex.sub(" ", self.preprocess(text))))
         date_count = len(self.date_regex.findall(text))
