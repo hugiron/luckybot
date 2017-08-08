@@ -25,7 +25,7 @@ def parse_args():
                         help='Groups count of one request')
     parser.add_argument('-c', '--city', type=str, default='objects/city.json',
                         help='Path to file with binary dump cities')
-    parser.add_argument('-m', '--members', type=int, default=200,
+    parser.add_argument('-m', '--members', type=int, default=500,
                         help='Min count of members in group')
     parser.add_argument('-o', '--output', type=str, default='objects/group.model',
                         help='Path to file with groups location')

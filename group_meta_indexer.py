@@ -19,7 +19,7 @@ def parse_args():
                         help='End group ID for indexer')
     parser.add_argument('--count', type=int, default=500,
                         help='Groups count of one request')
-    parser.add_argument('-m', '--members', type=int, default=200,
+    parser.add_argument('-m', '--members', type=int, default=500,
                         help='Min count of members in group')
     parser.add_argument('-o', '--output', type=str, default='objects/group_meta.model',
                         help='Path to file with groups metadata location')
