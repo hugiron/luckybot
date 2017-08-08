@@ -62,7 +62,7 @@ class ActorHandler(pykka.ThreadingActor):
     @tornado.gen.coroutine
     def handle(self, message):
         try:
-            if message['command'] in self.handler.handlers:
+            if 'command' in message and message['command'] in self.handler.handlers:
                 msg = yield self.handler.handlers[message['command']](message['user_id'], message.get('data'))
             else:
                 msg = dict(

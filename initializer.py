@@ -21,3 +21,11 @@ database = connect(db=config.mongo_database, host=config.mongo_host, port=int(co
                        username=config.mongo_username, password=config.mongo_password)
 contest_count = Contest.objects.count()
 user_count = User.objects.count()
+
+# Creating working directories
+import os
+
+os.mkdir('data')
+os.mkdir('log')
+
+# Creating cron jobs

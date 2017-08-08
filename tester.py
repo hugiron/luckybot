@@ -41,7 +41,10 @@ if __name__ == '__main__':
     target_accuracy = 0
     fullness = 0
     for item in sample:
-        if activate(similar(item[0])) == item[1]:
+        answer = activate(similar(item[0]))
+        if answer and not ('{date}' in item[0] and ('{vk_url}' in item[0] or '{vk_group}' in item[0])):
+            answer = 0
+        if answer == item[1]:
             full_accuracy += 1
             target_accuracy += 1
             if item[1]:

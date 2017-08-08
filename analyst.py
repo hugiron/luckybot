@@ -71,9 +71,9 @@ def parse_date(text, publish_date):
     short_date = short_date_regex.findall(text.replace(' ', ''))
     weekday_date = [weekdays[word] for word in text.split() if word in weekdays]
 
-    dates = filter(lambda x: x, list(map(datetime_from_full_date, full_date)) +
-                   list(map(datetime_from_short_date, short_date)) +
-                   list(map(datetime_from_weekday, weekday_date)))
+    dates = list(filter(lambda x: x, list(map(datetime_from_full_date, full_date)) +
+                        list(map(datetime_from_short_date, short_date)) +
+                        list(map(datetime_from_weekday, weekday_date))))
     return min(dates) if dates else None
 
 
@@ -120,9 +120,8 @@ if __name__ == '__main__':
     # Парсинг аргументов командной строки
     args = parse_args()
     config = SourceFileLoader('*', 'server.conf').load_module()
-    files = list(
-        map(lambda x: "%s/%s" % (args.folder, x),
-            filter(lambda x: x.startswith(args.prefix) and x.endswith('.list'), os.listdir(args.folder))))
+    files = list(map(lambda x: "%s/%s" % (args.folder, x),
+                     filter(lambda x: x.startswith(args.prefix) and x.endswith('.list'), os.listdir(args.folder))))
     for file in files:
         os.rename(file, "%s.tmp" % file)
     files = ["%s.tmp" % file for file in files]
