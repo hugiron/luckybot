@@ -12,6 +12,14 @@ class MessageParser:
             main=dict(
                 next={'show', 'add', 'delete', 'help', 'contest', 'city', 'category', 'gift'}
             ),
+            thanks=dict(
+                keywords={'spasibo', 'blagodarit', 'sposibo', 'thank', 'thanks', 'krasava', 'molodec', 'spasibochki',
+                          'mersi', 'blagodarnost', 'blagodarstvovat', 'blagodarnyj', 'sesibon'}
+            ),
+            greeting=dict(
+                keywords={'privet', 'privetulya', 'dratut', 'darof', 'zdravstvovat', 'jou', 'ku', 'start', 'startovat',
+                          'nachinat', 'pognat', 'nachalo', 'privetstvovat'}
+            ),
             show=dict(
                 keywords={'pokazyvat', 'poluchat', 'napisat', 'davat', 'posmotret', 'prosmatrivat', 'prosmotr',
                           'nahodit', 'poisk', 'iskat', 'rasskazyvat', 'podelitsya', 'daya', 'prihodit', 'naidi',

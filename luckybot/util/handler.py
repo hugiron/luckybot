@@ -26,6 +26,8 @@ class Handler:
         self.normalizer = Normalizer()
 
         self.handlers = dict(
+            thanks=self.thanks,
+            greeting=self.greeting,
             add=self.add,
             delete=self.delete,
             show=self.show,
@@ -94,6 +96,18 @@ class Handler:
     async def help(self, user_id, data):
         return dict(
             type='help',
+            user_id=user_id
+        )
+
+    async def thanks(self, user_id, data):
+        return dict(
+            type='thanks',
+            user_id=user_id
+        )
+
+    async def greeting(self, user_id, data):
+        return dict(
+            type='greeting',
             user_id=user_id
         )
 
