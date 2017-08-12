@@ -22,18 +22,18 @@ class CityModel:
         return id in self.title
 
     def __getitem__(self, item):
-        result = list()
+        result = set()
         current = self
         for elem in item:
             if elem not in current.city:
                 if current.id:
-                    result.append(current.id)
+                    result.add(current.id)
                 current = self
             if elem in current.city:
                 current = current.city[elem]
         if current.id:
-            result.append(current.id)
-        return result
+            result.add(current.id)
+        return list(result)
 
     @staticmethod
     def load(filename):

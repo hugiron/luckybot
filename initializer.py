@@ -25,5 +25,7 @@ user_count = User.objects.count()
 # Creating working directories
 import os
 
-os.mkdir('data')
-os.mkdir('log')
+if not os.path.exists('data'):
+    os.mkdir('data')
+if not os.path.exists('log'):
+    os.mkdir('log')
