@@ -100,28 +100,31 @@ def search_target_contest(user, contest_city, contest_category, contest_word):
 
 
 if __name__ == '__main__':
-    init_logger()
-    args = parse_args()
-    config = SourceFileLoader('*', 'server.conf').load_module()
-    database = connect(db=config.mongo_database, host=config.mongo_host, port=int(config.mongo_port),
-                       username=config.mongo_username, password=config.mongo_password)
-    template = ResponseTemplate.load(config.response_template)
-    access_token = AccessToken(args.tokens)
+    try:
+        init_logger()
+        args = parse_args()
+        config = SourceFileLoader('*', 'server.conf').load_module()
+        database = connect(db=config.mongo_database, host=config.mongo_host, port=int(config.mongo_port),
+                           username=config.mongo_username, password=config.mongo_password)
+        template = ResponseTemplate.load(config.response_template)
+        access_token = AccessToken(args.tokens)
 
-    global normalizer
-    normalizer = Normalizer()
+        global normalizer
+        normalizer = Normalizer()
 
-    vk_session = vk.Session(access_token=config.access_token)
-    vk_api = vk.API(vk_session, v='5.65', lang='ru')
+        vk_session = vk.Session(access_token=config.access_token)
+        vk_api = vk.API(vk_session, v='5.65', lang='ru')
 
-    current_date = datetime.datetime.now()
-    current_date -= datetime.timedelta(hours=current_date.hour, minutes=current_date.minute,
-                                       seconds=current_date.second, microseconds=current_date.microsecond)
-    contests = list(Contest.objects(date=current_date))
-    contest_city = build_dict_by_city(contests)
-    contest_category = build_dict_by_category(contests)
-    contest_word = build_dict_by_word(contests)
-    contest_factor = calculate_factor(contests, access_token)
+        current_date = datetime.datetime.now()
+        current_date -= datetime.timedelta(hours=current_date.hour, minutes=current_date.minute,
+                                           seconds=current_date.second, microseconds=current_date.microsecond)
+        contests = list(Contest.objects(date=current_date))
+        contest_city = build_dict_by_city(contests)
+        contest_category = build_dict_by_category(contests)
+        contest_word = build_dict_by_word(contests)
+        contest_factor = calculate_factor(contests, access_token)
+    except Exception as msg:
+        logging.error(str(msg))
 
     for user in User.objects():
         try:

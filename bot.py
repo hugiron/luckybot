@@ -7,7 +7,7 @@ import tornado.web
 import tornado.options
 import tornado.escape
 
-import asyncmc
+import memcache
 from motor.motor_tornado import MotorClient
 
 from luckybot.actor.pool import PoolActor
@@ -54,8 +54,9 @@ class Application(tornado.web.Application):
                                                   tornado.options.options.mongo_host,
                                                   tornado.options.options.mongo_port,
                                                   tornado.options.options.mongo_database)
+        mc_servers = tornado.options.options.memcached_server.split(',')
         self.motor_client = MotorClient(mongo_url)
-        self.mc = asyncmc.Client(servers=tornado.options.options.memcached_server.split(','))
+        self.memcached = memcache.Client(servers=mc_servers)
 
         settings = dict(
             autoreload=True,
@@ -74,7 +75,7 @@ class Application(tornado.web.Application):
             max_contest_count=int(tornado.options.options.max_contest_count),
             max_contest_days=int(tornado.options.options.max_contest_days),
             db=self.motor_client[tornado.options.options.mongo_database],
-            mc=self.mc
+            mc_servers=mc_servers
         )
 
         tornado.web.Application.__init__(self, handlers, **settings)
@@ -93,10 +94,10 @@ class MessageHandler(tornado.web.RequestHandler):
             user_id = data['object']['user_id']
             current_time = int(time.time())
             key = 'time_%d' % user_id
-            last_appeal = yield self.application.mc.get(key)
+            last_appeal = self.application.memcached.get(key)
             if last_appeal and current_time - last_appeal <= self.settings['timeout']:
                 return
-            yield self.application.mc.set(key, current_time)
+            self.application.memcached.set(key, current_time)
 
             if data.get('secret') == tornado.options.options.secret_key:
                 self.application.actor_pool.proxy().parse(data)

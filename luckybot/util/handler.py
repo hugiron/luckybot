@@ -3,14 +3,15 @@ import sys
 import random
 import datetime
 from collections import Counter
+import memcache
 
 from luckybot.util.normalizer import Normalizer
 
 
 class Handler:
-    def __init__(self, db, mc, city, category, group_id, max_contest_count, max_contest_days):
+    def __init__(self, db, mc_servers, city, category, group_id, max_contest_count, max_contest_days):
         self.db = db
-        self.mc = mc
+        self.memcached = memcache.Client(mc_servers)
         self.city = city
         self.category = category
         self.group_id = group_id
@@ -144,7 +145,7 @@ class Handler:
         )
 
     async def add_city(self, user_id, data):
-        user_city = await self.mc.get(self.city_keyword(user_id))
+        user_city = self.memcached.get(self.city_keyword(user_id))
         if not user_city:
             user = await self.get_or_create_user(user_id)
             user_city = user['city']
@@ -156,14 +157,14 @@ class Handler:
                 count += 1
         user_city = list(user_city)
         await self.db.user.update({'user_id': user_id}, {'$set': {'city': user_city}}, upsert=False)
-        await self.mc.set(self.city_keyword(user_id), user_city)
+        self.memcached.set(self.city_keyword(user_id), user_city)
         return dict(
             type='not_add_city' if not count else ('add_city' if count == 1 else 'add_cities'),
             user_id=user_id
         )
 
     async def add_category(self, user_id, data):
-        user_category = await self.mc.get(self.category_keyword(user_id))
+        user_category = self.memcached.get(self.category_keyword(user_id))
         if not user_category:
             user = await self.get_or_create_user(user_id)
             user_category = user['category']
@@ -188,14 +189,14 @@ class Handler:
                 user_category.add(category)
         user_category = list(user_category)
         await self.db.user.update({'user_id': user_id}, {'$set': {'category': user_category}}, upsert=False)
-        await self.mc.set(self.category_keyword(user_id), user_category)
+        self.memcached.set(self.category_keyword(user_id), user_category)
         return dict(
             type='not_add_category' if not count else ('add_category' if count == 1 else 'add_categories'),
             user_id=user_id
         )
 
     async def add_gift(self, user_id, data):
-        user_gift = await self.mc.get(self.gift_keyword(user_id))
+        user_gift = self.memcached.get(self.gift_keyword(user_id))
         if not user_gift:
             user = await self.get_or_create_user(user_id)
             user_gift = user['gift']
@@ -207,14 +208,14 @@ class Handler:
                 count += 1
         user_gift = list(user_gift)
         await self.db.user.update({'user_id': user_id}, {'$set': {'gift': user_gift}}, upsert=False)
-        await self.mc.set(self.gift_keyword(user_id), user_gift)
+        self.memcached.set(self.gift_keyword(user_id), user_gift)
         return dict(
             type='not_add_gift' if not count else ('add_gift' if count == 1 else 'add_gifts'),
             user_id=user_id
         )
 
     async def delete_city(self, user_id, data):
-        user_city = await self.mc.get(self.city_keyword(user_id))
+        user_city = self.memcached.get(self.city_keyword(user_id))
         if not user_city:
             user = await self.get_or_create_user(user_id)
             user_city = user['city']
@@ -226,14 +227,14 @@ class Handler:
                 count += 1
         user_city = list(user_city)
         await self.db.user.update({'user_id': user_id}, {'$set': {'city': user_city}}, upsert=False)
-        await self.mc.set(self.city_keyword(user_id), user_city)
+        self.memcached.set(self.city_keyword(user_id), user_city)
         return dict(
             type='not_delete_city' if not count else ('delete_city' if count == 1 else 'delete_cities'),
             user_id=user_id
         )
 
     async def delete_category(self, user_id, data):
-        user_category = await self.mc.get(self.category_keyword(user_id))
+        user_category = self.memcached.get(self.category_keyword(user_id))
         if not user_category:
             user = await self.get_or_create_user(user_id)
             user_category = user['category']
@@ -255,14 +256,14 @@ class Handler:
                 count += 1
         user_category = list(user_category)
         await self.db.user.update({'user_id': user_id}, {'$set': {'category': user_category}}, upsert=False)
-        await self.mc.set(self.category_keyword(user_id), user_category)
+        self.memcached.set(self.category_keyword(user_id), user_category)
         return dict(
             type='not_delete_category' if not count else ('delete_category' if count == 1 else 'delete_categories'),
             user_id=user_id
         )
 
     async def delete_gift(self, user_id, data):
-        user_gift = await self.mc.get(self.gift_keyword(user_id))
+        user_gift = self.memcached.get(self.gift_keyword(user_id))
         if not user_gift:
             user = await self.get_or_create_user(user_id)
             user_gift = user['gift']
@@ -274,18 +275,18 @@ class Handler:
                 count += 1
         user_gift = list(user_gift)
         await self.db.user.update({'user_id': user_id}, {'$set': {'gift': user_gift}}, upsert=False)
-        await self.mc.set(self.gift_keyword(user_id), user_gift)
+        self.memcached.set(self.gift_keyword(user_id), user_gift)
         return dict(
             type='not_delete_gift' if not count else ('delete_gift' if count == 1 else 'delete_gifts'),
             user_id=user_id
         )
 
     async def show_city(self, user_id, data):
-        user_city = await self.mc.get(self.city_keyword(user_id))
+        user_city = self.memcached.get(self.city_keyword(user_id))
         if not user_city:
             user = await self.get_or_create_user(user_id)
             user_city = user['city']
-            await self.mc.set(self.city_keyword(user_id), user_city)
+            self.memcached.set(self.city_keyword(user_id), user_city)
         return dict(
             type='show_city',
             user_id=user_id,
@@ -293,11 +294,11 @@ class Handler:
         )
 
     async def show_category(self, user_id, data):
-        user_category = await self.mc.get(self.category_keyword(user_id))
+        user_category = self.memcached.get(self.category_keyword(user_id))
         if not user_category:
             user = await self.get_or_create_user(user_id)
             user_category = user['category']
-            await self.mc.set(self.category_keyword(user_id), user_category)
+            self.memcached.set(self.category_keyword(user_id), user_category)
         return dict(
             type='show_category',
             user_id=user_id,
@@ -305,11 +306,11 @@ class Handler:
         )
 
     async def show_gift(self, user_id, data):
-        user_gift = await self.mc.get(self.gift_keyword(user_id))
+        user_gift = self.memcached.get(self.gift_keyword(user_id))
         if not user_gift:
             user = await self.get_or_create_user(user_id)
             user_gift = user['gift']
-            await self.mc.set(self.gift_keyword(user_id), user_gift)
+            self.memcached.set(self.gift_keyword(user_id), user_gift)
         return dict(
             type='show_gift',
             user_id=user_id,
@@ -333,14 +334,12 @@ class Handler:
         )
 
     async def search_contest_random(self, user_id, data):
-        user_city = await self.mc.get(self.city_keyword(user_id))
+        user_city = self.memcached.get(self.city_keyword(user_id))
         if not user_city:
             user = await self.get_or_create_user(user_id)
             user_city = user['city']
-            await self.mc.set(self.city_keyword(user_id), user_city)
-        current_date = datetime.datetime.now()
-        current_date -= datetime.timedelta(hours=current_date.hour, minutes=current_date.minute,
-                                           seconds=current_date.second, microseconds=current_date.microsecond)
+            self.memcached.set(self.city_keyword(user_id), user_city)
+        current_date = datetime.datetime.now().date()
         cursor = self.db.contest.aggregate(
             [
                 {
@@ -371,14 +370,12 @@ class Handler:
         if data:
             user_city = data['city']
         else:
-            user_city = await self.mc.get(self.city_keyword(user_id))
+            user_city = self.memcached.get(self.city_keyword(user_id))
             if not user_city:
                 user = await self.get_or_create_user(user_id)
                 user_city = user['city']
-                await self.mc.set(self.city_keyword(user_id), user_city)
-        current_date = datetime.datetime.now()
-        current_date -= datetime.timedelta(hours=current_date.hour, minutes=current_date.minute,
-                                           seconds=current_date.second, microseconds=current_date.microsecond)
+                self.memcached.set(self.city_keyword(user_id), user_city)
+        current_date = datetime.datetime.now().date()
         cursor = self.db.contest.aggregate(
             [
                 {
@@ -405,22 +402,20 @@ class Handler:
         )
 
     async def search_contest_category(self, user_id, data):
-        user_city = await self.mc.get(self.city_keyword(user_id))
+        user_city = self.memcached.get(self.city_keyword(user_id))
         if not user_city:
             user = await self.get_or_create_user(user_id)
             user_city = user['city']
-            await self.mc.set(self.city_keyword(user_id), user_city)
+            self.memcached.set(self.city_keyword(user_id), user_city)
         if data:
             user_category = data['category']
         else:
-            user_category = await self.mc.get(self.category_keyword(user_id))
+            user_category = self.memcached.get(self.category_keyword(user_id))
             if not user_category:
                 user = await self.get_or_create_user(user_id)
                 user_category = user['category']
-                await self.mc.set(self.category_keyword(user_id), user_category)
-        current_date = datetime.datetime.now()
-        current_date -= datetime.timedelta(hours=current_date.hour, minutes=current_date.minute,
-                                           seconds=current_date.second, microseconds=current_date.microsecond)
+                self.memcached.set(self.category_keyword(user_id), user_category)
+        current_date = datetime.datetime.now().date()
         cursor = self.db.contest.aggregate(
             [
                 {
@@ -457,24 +452,22 @@ class Handler:
         )
 
     async def search_contest_gift(self, user_id, data):
-        user_city = await self.mc.get(self.city_keyword(user_id))
+        user_city = self.memcached.get(self.city_keyword(user_id))
         if not user_city:
             user = await self.get_or_create_user(user_id)
             user_city = user['city']
-            await self.mc.set(self.city_keyword(user_id), user_city)
+            self.memcached.set(self.city_keyword(user_id), user_city)
         if data:
             user_gift = data['gift']
         else:
-            user_gift = await self.mc.get(self.gift_keyword(user_id))
+            user_gift = self.memcached.get(self.gift_keyword(user_id))
             if not user_gift:
                 user = await self.get_or_create_user(user_id)
                 user_gift = user['gift']
-                await self.mc.set(self.gift_keyword(user_id), user_gift)
+                self.memcached.set(self.gift_keyword(user_id), user_gift)
         user_gift = list(map(lambda item: self.normalizer.text_normalize(item), user_gift))
         random.shuffle(user_gift)
-        current_date = datetime.datetime.now()
-        current_date -= datetime.timedelta(hours=current_date.hour, minutes=current_date.minute,
-                                           seconds=current_date.second, microseconds=current_date.microsecond)
+        current_date = datetime.datetime.now().date()
         cursor = self.db.contest.aggregate(
             [
                 {
