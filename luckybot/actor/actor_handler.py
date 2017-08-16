@@ -4,6 +4,7 @@ import tornado.gen
 import pykka
 import vk
 import json
+import memcache
 
 from luckybot.util.message_parser import MessageParser
 from luckybot.util.handler import Handler
@@ -11,7 +12,7 @@ from luckybot.util.handler import Handler
 
 class ActorHandler(pykka.ThreadingActor):
     def __init__(self, pool, group, city, category, access_token, response_template, group_id, max_contest_count,
-                 max_contest_days, db, mc):
+                 max_contest_days, db, mc_servers):
         super(ActorHandler, self).__init__()
         self.pool = pool
         self.group = group
@@ -23,10 +24,10 @@ class ActorHandler(pykka.ThreadingActor):
         self.max_contest_count = max_contest_count
         self.max_contest_days = max_contest_days
         self.db = db
-        self.mc = mc
+        self.memcached = memcache.Client(servers=mc_servers)
 
         self.message_parser = MessageParser(self.city, self.category)
-        self.handler = Handler(self.db, self.mc, self.city, self.category, self.group_id, self.max_contest_count,
+        self.handler = Handler(self.db, self.memcached, self.city, self.category, self.group_id, self.max_contest_count,
                                self.max_contest_days)
 
         self.vk_session = vk.Session(access_token=access_token)

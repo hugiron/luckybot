@@ -3,15 +3,14 @@ import sys
 import random
 import datetime
 from collections import Counter
-import memcache
 
 from luckybot.util.normalizer import Normalizer
 
 
 class Handler:
-    def __init__(self, db, mc_servers, city, category, group_id, max_contest_count, max_contest_days):
+    def __init__(self, db, memcached, city, category, group_id, max_contest_count, max_contest_days):
         self.db = db
-        self.memcached = memcache.Client(mc_servers)
+        self.memcached = memcached
         self.city = city
         self.category = category
         self.group_id = group_id
