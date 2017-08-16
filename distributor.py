@@ -101,6 +101,7 @@ def search_target_contest(user, contest_city, contest_category, contest_word):
 
 if __name__ == '__main__':
     try:
+        global args
         init_logger()
         args = parse_args()
         config = SourceFileLoader('*', 'server.conf').load_module()
@@ -115,9 +116,7 @@ if __name__ == '__main__':
         vk_session = vk.Session(access_token=config.access_token)
         vk_api = vk.API(vk_session, v='5.65', lang='ru')
 
-        current_date = datetime.datetime.now()
-        current_date -= datetime.timedelta(hours=current_date.hour, minutes=current_date.minute,
-                                           seconds=current_date.second, microseconds=current_date.microsecond)
+        current_date = datetime.datetime.combine(datetime.date.today(), datetime.datetime.min.time()) + datetime.timedelta(days=1)
         contests = list(Contest.objects(date=current_date))
         contest_city = build_dict_by_city(contests)
         contest_category = build_dict_by_category(contests)

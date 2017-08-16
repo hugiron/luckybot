@@ -97,7 +97,7 @@ def parse_date(text, publish_date):
 
 def classifier(filename):
     try:
-        current_date = datetime.datetime.now().date()
+        current_date = datetime.date.today()
         with open(filename, 'r') as file_corpus:
             for post in file_corpus:
                 try:

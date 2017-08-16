@@ -317,28 +317,25 @@ class Handler:
         )
 
     async def show_contest(self, user_id, data):
-        search_engine = [self.search_contest_category, self.search_contest_random, self.search_contest_gift, self.search_contest_random]
-        index = random.randint(0, sys.maxsize) % 4
-        contest = await search_engine[index](user_id, None)
-        if not contest:
-            contest = await search_engine[index - 1](user_id, None)
-            if not contest:
-                contest = await search_engine[index - 2](user_id, None)
-                if not contest:
-                    contest = await search_engine[index - 3](user_id, None)
+        batch_size = self.max_contest_count // 3
+        gift_contest = await self.search_contest_gift(user_id, None, batch_size)
+        category_contest = await self.search_contest_category(user_id, None, self.max_contest_count - len(gift_contest) - batch_size)
+        random_contest = await self.search_contest_random(user_id, None, self.max_contest_count - len(gift_contest) - len(category_contest))
+        contest = gift_contest + category_contest + random_contest
+        random.shuffle(contest)
         return dict(
             type='show_contest' if contest else 'not_show_contest',
             user_id=user_id,
             data=Handler.render_contest(contest)
         )
 
-    async def search_contest_random(self, user_id, data):
+    async def search_contest_random(self, user_id, data, count=None):
         user_city = self.memcached.get(self.city_keyword(user_id))
         if not user_city:
             user = await self.get_or_create_user(user_id)
             user_city = user['city']
             self.memcached.set(self.city_keyword(user_id), user_city)
-        current_date = datetime.datetime.now().date()
+        current_date = datetime.datetime.combine(datetime.date.today(), datetime.datetime.min.time())
         cursor = self.db.contest.aggregate(
             [
                 {
@@ -357,7 +354,7 @@ class Handler:
                                 ]
                         }
                 },
-                {'$sample': {'size': self.max_contest_count}}
+                {'$sample': {'size': count if count else self.max_contest_count}}
             ]
         )
         contest = list()
@@ -365,7 +362,7 @@ class Handler:
             contest.append(cursor.next_object())
         return contest
 
-    async def show_contest_city(self, user_id, data):
+    async def show_contest_city(self, user_id, data, count=None):
         if data:
             user_city = data['city']
         else:
@@ -374,7 +371,7 @@ class Handler:
                 user = await self.get_or_create_user(user_id)
                 user_city = user['city']
                 self.memcached.set(self.city_keyword(user_id), user_city)
-        current_date = datetime.datetime.now().date()
+        current_date = datetime.datetime.combine(datetime.date.today(), datetime.datetime.min.time())
         cursor = self.db.contest.aggregate(
             [
                 {
@@ -388,7 +385,7 @@ class Handler:
                                 ]
                         }
                 },
-                {'$sample': {'size': self.max_contest_count}}
+                {'$sample': {'size': count if count else self.max_contest_count}}
             ]
         )
         contest = list()
@@ -400,7 +397,7 @@ class Handler:
             data=Handler.render_contest(contest)
         )
 
-    async def search_contest_category(self, user_id, data):
+    async def search_contest_category(self, user_id, data, count=None):
         user_city = self.memcached.get(self.city_keyword(user_id))
         if not user_city:
             user = await self.get_or_create_user(user_id)
@@ -414,7 +411,7 @@ class Handler:
                 user = await self.get_or_create_user(user_id)
                 user_category = user['category']
                 self.memcached.set(self.category_keyword(user_id), user_category)
-        current_date = datetime.datetime.now().date()
+        current_date = datetime.datetime.combine(datetime.date.today(), datetime.datetime.min.time())
         cursor = self.db.contest.aggregate(
             [
                 {
@@ -434,7 +431,7 @@ class Handler:
                                 ]
                         }
                 },
-                {'$sample': {'size': self.max_contest_count}}
+                {'$sample': {'size': count if count else self.max_contest_count}}
             ]
         )
         contest = list()
@@ -450,7 +447,7 @@ class Handler:
             data=Handler.render_contest(contest)
         )
 
-    async def search_contest_gift(self, user_id, data):
+    async def search_contest_gift(self, user_id, data, count=None):
         user_city = self.memcached.get(self.city_keyword(user_id))
         if not user_city:
             user = await self.get_or_create_user(user_id)
@@ -466,7 +463,7 @@ class Handler:
                 self.memcached.set(self.gift_keyword(user_id), user_gift)
         user_gift = list(map(lambda item: self.normalizer.text_normalize(item), user_gift))
         random.shuffle(user_gift)
-        current_date = datetime.datetime.now().date()
+        current_date = datetime.datetime.combine(datetime.date.today(), datetime.datetime.min.time())
         cursor = self.db.contest.aggregate(
             [
                 {
@@ -492,7 +489,7 @@ class Handler:
                                 ]
                         }
                 },
-                {'$sample': {'size': self.max_contest_count}}
+                {'$sample': {'size': count if count else self.max_contest_count}}
             ]
         )
         contest = list()
