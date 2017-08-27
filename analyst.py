@@ -31,7 +31,7 @@ def parse_args():
                         help='Path to model with approved groups and screen names')
     parser.add_argument('-t', '--threshold', type=float, default=0.9,
                         help='Threshold value for the classifier')
-    parser.add_argument('-a', '--alpha', type=float, default=0.01,
+    parser.add_argument('-a', '--alpha', type=float, default=1,
                         help='Smoothing factor for the classifier')
     return parser.parse_args()
 

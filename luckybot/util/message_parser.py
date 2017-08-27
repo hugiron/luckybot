@@ -10,11 +10,11 @@ class MessageParser:
 
         self.grammar = dict(
             main=dict(
-                next={'show', 'add', 'delete', 'help', 'contest', 'city', 'category', 'gift'}
+                next={'show', 'add', 'delete', 'help', 'contest', 'city', 'category', 'gift', 'thanks', 'greeting'}
             ),
             thanks=dict(
                 keywords={'spasibo', 'blagodarit', 'sposibo', 'thank', 'thanks', 'krasava', 'molodec', 'spasibochki',
-                          'mersi', 'blagodarnost', 'blagodarstvovat', 'blagodarnyj', 'sesibon'}
+                          'mersi', 'blagodarnost', 'blagodarstvovat', 'blagodarnyj', 'sesibon', 'sps'}
             ),
             greeting=dict(
                 keywords={'privet', 'privetulya', 'dratut', 'darof', 'zdravstvovat', 'jou', 'ku', 'start', 'startovat',

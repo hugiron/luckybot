@@ -58,14 +58,17 @@ if __name__ == '__main__':
                 end_id = min(args.end + 1, begin_id + args.count)
                 if not begin_id < end_id:
                     break
-                data = api.groups.getById(group_ids=','.join(map(str, range(begin_id, end_id))), fields='members_count',
-                                          access_token=access_token())
+                data = api.groups.getById(group_ids=','.join(map(str, range(begin_id, end_id))),
+                                          fields='members_count,description,status,city', access_token=access_token())
                 # Сохранение только тех сообществ, которые относятся к определенному городу
                 for current in data:
                     begin_id = current['id'] + 1
                     if 'members_count' not in current or current['members_count'] < args.members:
                         continue
-                    group[current['id']] = cities[map(translit, normalizer.normalize(current['name']))]
+                    text = '%s %s %s' % (current.get('name'), current.get('status'), current.get('description'))
+                    group[current['id']] = cities[map(translit, normalizer.normalize(text))]
+                    if 'city' in current and current['city']['id'] not in group[current['id']]:
+                        group[current['id']].append(current['city']['id'])
                 break
             except Exception as msg:
                 logging.error(str(msg))

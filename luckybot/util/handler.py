@@ -1,5 +1,4 @@
 import vk
-import sys
 import random
 import datetime
 from collections import Counter
@@ -66,11 +65,11 @@ class Handler:
 
         if not contest:
             return []
-        contest.sort(key=lambda item: item['date'])
+        #contest.sort(key=lambda item: item['date'])
         result = list()
         for index, item in enumerate(contest):
-            if not index or not eq_date(item['date'], contest[index - 1]['date']):
-                result.append('<br>Розыгрыши от %s:' % date_to_str(item['date']))
+            #if not index or not eq_date(item['date'], contest[index - 1]['date']):
+            #    result.append('<br>Розыгрыши от %s:' % date_to_str(item['date']))
             result.append('https://vk.com/wall%s' % item['post_id'])
         return result
 
@@ -321,7 +320,7 @@ class Handler:
         gift_contest = await self.search_contest_gift(user_id, None, batch_size)
         category_contest = await self.search_contest_category(user_id, None, self.max_contest_count - len(gift_contest) - batch_size)
         random_contest = await self.search_contest_random(user_id, None, self.max_contest_count - len(gift_contest) - len(category_contest))
-        contest = gift_contest + category_contest + random_contest
+        contest = list(set(gift_contest + category_contest + random_contest))
         random.shuffle(contest)
         return dict(
             type='show_contest' if contest else 'not_show_contest',
