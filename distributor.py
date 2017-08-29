@@ -80,11 +80,14 @@ def calculate_factor(contests, access_token):
 
 def search_target_contest(user, contest_city, contest_category, contest_word):
     result = set()
-    for category in user.category:
-        if category in contest_category:
-            for post_id in contest_category[category]:
-                if post_id not in contest_city or contest_city[post_id].intersection(user.city):
-                    result.add(post_id)
+    if user.category:
+        for category in user.category:
+            if category in contest_category:
+                for post_id in contest_category[category]:
+                    if post_id not in contest_city or contest_city[post_id].intersection(user.city):
+                        result.add(post_id)
+    else:
+        result = set([post_id for category, posts in contest_category.items() for post_id in posts])
     for gift in user.gift:
         keywords = normalizer.text_normalize(gift).split()
         is_full = True
@@ -127,7 +130,7 @@ if __name__ == '__main__':
 
     for user in User.objects():
         try:
-            user_contest = list(map(lambda item: (item, contest_factor[item]),
+            user_contest = list(map(lambda item: (item, contest_factor[item] if item in contest_factor else 0),
                                     search_target_contest(user, contest_city, contest_category, contest_word)))
             user_contest.sort(key=lambda item: -item[1])
             user_contest = random.sample(user_contest[:args.size_cut], min(args.count, len(user_contest)))

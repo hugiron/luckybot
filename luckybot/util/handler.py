@@ -25,6 +25,7 @@ class Handler:
         self.normalizer = Normalizer()
 
         self.handlers = dict(
+            message_allow=self.message_allow,
             thanks=self.thanks,
             greeting=self.greeting,
             add=self.add,
@@ -101,6 +102,13 @@ class Handler:
     async def thanks(self, user_id, data):
         return dict(
             type='thanks',
+            user_id=user_id
+        )
+
+    async def message_allow(self, user_id, data):
+        await self.get_or_create_user(user_id)
+        return dict(
+            type='greeting',
             user_id=user_id
         )
 
@@ -285,10 +293,14 @@ class Handler:
             user = await self.get_or_create_user(user_id)
             user_city = user['city']
             self.memcached.set(self.city_keyword(user_id), user_city)
+        if user_city:
+            data = ', '.join(map(lambda city_id: self.city.get_title(city_id), user_city))
+        else:
+            data = '<не найдено>'
         return dict(
             type='show_city',
             user_id=user_id,
-            data=', '.join(map(lambda city_id: self.city.get_title(city_id), user_city))
+            data=data
         )
 
     async def show_category(self, user_id, data):
@@ -309,10 +321,14 @@ class Handler:
             user = await self.get_or_create_user(user_id)
             user_gift = user['gift']
             self.memcached.set(self.gift_keyword(user_id), user_gift)
+        if user_gift:
+            data = ', '.join(map(lambda x: '"%s"' % x, user_gift))
+        else:
+            data = '<не найдено>'
         return dict(
             type='show_gift',
             user_id=user_id,
-            data=', '.join(map(lambda x: '"%s"' % x, user_gift))
+            data=data
         )
 
     async def show_contest(self, user_id, data):
@@ -320,7 +336,12 @@ class Handler:
         gift_contest = await self.search_contest_gift(user_id, None, batch_size)
         category_contest = await self.search_contest_category(user_id, None, self.max_contest_count - len(gift_contest) - batch_size)
         random_contest = await self.search_contest_random(user_id, None, self.max_contest_count - len(gift_contest) - len(category_contest))
-        contest = list(set(gift_contest + category_contest + random_contest))
+        contest = list()
+        buffer = set()
+        for item in gift_contest + category_contest + random_contest:
+            if item['post_id'] not in buffer:
+                contest.append(item)
+                buffer.add(item['post_id'])
         random.shuffle(contest)
         return dict(
             type='show_contest' if contest else 'not_show_contest',

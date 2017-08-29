@@ -3,7 +3,7 @@ from mongoengine.fields import StringField, IntField, ListField, DateTimeField, 
 
 
 class Contest(Document):
-    post_id = StringField(required=True)
+    post_id = StringField(required=True, unique=True)
     text = StringField(required=True)
     date = DateTimeField(required=True)
     city = ListField(IntField())
