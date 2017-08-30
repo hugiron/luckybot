@@ -44,19 +44,22 @@ class CategoryModel:
             return (reduce(lambda x, y: y if y == x + 1 and x else 0, first) if first else True) and \
                    (reduce(lambda x, y: y if y == x + 1 and x else 0, second) if second else True)
 
-        def parse(accumulator, balance):
+        def parse(accumulator, counter, balance):
             if balance:
                 seq = list()
                 for option in balance[0]:
-                    seq.append(parse(accumulator + [option], balance[1:]))
+                    seq.append(parse(accumulator=accumulator + [option],
+                                     counter=counter + [len(set(map(lambda item: item.split(':')[0], balance[0])))],
+                                     balance=balance[1:]))
                 maximum = max(seq, key=lambda x: x[1])[1]
                 return min(filter(lambda x: x[1] == maximum, seq), key=lambda x: len(x[0]))
             else:
                 result = set()
                 result_lexem = 0
                 current = list()
+                single = True
                 key = None
-                for category in accumulator:
+                for index, category in enumerate(accumulator):
                     last_key = category.split(':')[0]
                     if key != last_key:
                         if key in current and check_seq(current):
@@ -66,8 +69,11 @@ class CategoryModel:
                                 result = result.union(current)
                             else:
                                 result.add(key)
+                        elif single:
+                                result = result.union(current)
                         key = last_key
                         current = list()
+                    single &= not bool(counter[index] - 1)
                     current.append(category)
                 if key in current and check_seq(current):
                     result_lexem += len(current)
@@ -76,9 +82,11 @@ class CategoryModel:
                         result = result.union(current)
                     else:
                         result.add(key)
+                elif single:
+                    result = result.union(current)
                 return list(result), result_lexem
 
-        return parse([], norm_sentence)[0]
+        return parse([], [], norm_sentence)[0]
 
     def get_keywords(self, category_id):
         if isinstance(category_id, str):

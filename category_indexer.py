@@ -27,7 +27,7 @@ if __name__ == '__main__':
         posts = set()
         for category_id, keywords in category.keywords.items():
             current_posts = set()
-            for keyword in map(lambda item: '"%s"' % item, keywords):
+            for keyword in map(lambda item: '%s' % item, keywords):
                 for contest in Contest.objects(is_tagged=False).search_text(keyword, language='ru'):
                     if contest.post_id not in current_posts:
                         contest.update(push__category=category_id)
