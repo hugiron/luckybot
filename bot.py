@@ -19,7 +19,7 @@ from luckybot.model.group import GroupModel
 from luckybot.model.response_template import ResponseTemplate
 from luckybot.util.logger import init_logger
 
-tornado.options.define('port')
+tornado.options.define('bot_port')
 tornado.options.define('timeout')
 
 tornado.options.define('access_token')
@@ -106,7 +106,7 @@ class MessageHandler(tornado.web.RequestHandler):
 def main():
     tornado.options.parse_config_file('server.conf')
     http_server = tornado.httpserver.HTTPServer(Application())
-    http_server.listen(tornado.options.options.port)
+    http_server.listen(tornado.options.options.bot_port)
 
     print("Start listening...")
     tornado.ioloop.IOLoop.instance().start()

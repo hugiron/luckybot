@@ -1,0 +1,162 @@
+/*
+    Theme Responsive Design
+*/
+
+@media (max-width: 1024px) {
+	.hero_section{
+        height: 600px;
+    }
+    .feature_moc{
+        margin-top: 0;
+    }
+    .screen_wrap{
+        width: 800px;
+    }
+}
+
+/* ---- Start of max-width 992px CSS ---- */
+@media (max-width: 992px) {
+    ul.nav > li > a {
+        font-size: 10px;
+        padding: 0 5px;
+    }
+    .section_heading p br{
+		display: none;
+	}
+    .fs_btn{
+		line-height: 35px;
+		padding: 0 15px;
+		font-size: 14px;
+	}
+    .hero_section{
+        height: 550px;
+    }
+    .screen_wrap{
+        width: 100%;
+    }
+    .swiper-wrapper{
+        margin-left: 0;
+    }
+    .dl_content {
+        padding: 25px 0;
+    }
+    .dl_moc .dl_moc_1{
+        width: 85%;
+    }
+    .dl_moc .dl_moc_2 {
+        width: 80%;
+    }
+
+}
+/* ---- End of max-width 992px CSS ---- */
+
+
+/* ---- Start of min-width 480px and max-width 768px CSS ---- */
+@media all and (min-width: 480px) and (max-width: 768px) {
+	
+}
+/* ---- End of min-width 480px and max-width 768px CSS ---- */
+
+
+/* ---- Start of max-width 767px CSS ---- */
+@media all and (max-width: 767px) {
+    body, p{
+        font-size: 12px;
+        line-height: 22px;
+    }
+    h1{
+        font-size: 30px;
+    }
+    h2{
+        font-size: 20px;
+    }
+    h3{
+        font-size: 16px;
+    }
+    p br{
+        display: none;
+    }
+    .padding{
+        padding: 60px 0;
+    }
+    .xs-padding{
+    	padding: 15px;
+    }
+    .navbar-collapse {
+        background-color: #232323;
+        border-top: medium none;
+        box-shadow: none;
+        margin-top: 0px;
+        overflow-x: visible;
+        padding-left: 0;
+        padding-right: 0;
+    }
+    .navbar .collapse .nav_btn{
+        display: block;
+        line-height: 45px;
+    }
+    ul.nav{
+        margin: 0;
+        overflow: hidden;
+    }
+    ul.nav > li{
+        display: block;
+        margin: 0;
+    }
+    ul.nav > li > a{
+        display: block;
+        font-size: 14px;
+        color: #ddd;
+        line-height: 45px;
+        padding: 0 30px;
+    }
+    ul.nav > li > a:after{
+        display: none;
+    }
+    ul.nav > li > a:hover,
+    ul.nav > li.active > a {
+        background-color: transparent;
+        color: #fff;
+    }
+    .hero_section{
+        height: 450px;
+    }
+    .video_content h2 {
+        padding: 19px 0;
+    }
+    .screen_wrap{
+        width: 266px;
+    }
+    .dl_content{
+        text-align: center;
+    }
+	.contact_form .form-group .col-sm-6:first-child{
+        margin-bottom: 15px;
+    }
+}
+/* ---- End of max-width 767px CSS ---- */
+
+
+/* ---- Start of max-width 480px CSS ---- */
+@media all and (max-width: 480px) {
+    .col-xs-6{
+        float: none;
+        width: 100%;
+    }
+
+}
+/* ---- End of max-width 480px CSS ---- */
+
+
+/* ---- Start of max-width 420px CSS ---- */
+@media all and (max-width: 420px) {
+    
+}
+/* ---- End of max-width 420px CSS ---- */
+
+
+/* ---- Start of max-width 380px CSS ---- */
+@media all and (max-width: 380px) {
+	
+}
+/* ---- End of max-width 380px CSS ---- */

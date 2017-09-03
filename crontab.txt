@@ -2,6 +2,7 @@
 @weekly cd ~/luckybot && python3 group_meta_indexer.py
 
 @reboot cd ~/luckybot && python3 bot.py
+@reboot cd ~/luckybot && python3 landing.py
 
 */15 * * * * cd ~/luckybot && python3 aggregator.py
 */15 * * * * cd ~/luckybot && python3 analyst.py

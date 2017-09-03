@@ -64,13 +64,17 @@ class ActorHandler(pykka.ThreadingActor):
     def handle(self, message):
         try:
             if 'command' in message and message['command'] in self.handler.handlers:
-                msg = yield self.handler.handlers[message['command']](message['user_id'], message.get('data'))
+                response = yield self.handler.handlers[message['command']](message['user_id'], message.get('data'))
+                if type(response) != list:
+                    response = [response]
+                for msg in response:
+                    self.pool.proxy().send(msg)
             else:
                 msg = dict(
                     type='not_recognized',
                     user_id=message['user_id']
                 )
-            self.pool.proxy().send(msg)
+                self.pool.proxy().send(msg)
         except Exception as exc:
             logging.error('%s\n%s' % (str(exc), json.dumps(message)))
 

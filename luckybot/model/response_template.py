@@ -1,3 +1,4 @@
+import sys
 import json
 import random
 
@@ -7,9 +8,12 @@ class ResponseTemplate:
         self.templates = templates
 
     def render(self, type, data=None):
+        def choice(array):
+            return array[random.randint(0, sys.maxsize) % len(array)]
+
         if type in self.templates:
-            response = random.choice(self.templates[type]['text'])
-            sticker = random.choice(self.templates[type]['sticker']) if 'sticker' in self.templates[type] else None
+            response = choice(self.templates[type]['text'])
+            sticker = choice(self.templates[type]['sticker']) if 'sticker' in self.templates[type] else None
             if data:
                 if isinstance(data, list):
                     data = '<br>'.join(map(str, data))

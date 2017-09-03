@@ -10,34 +10,33 @@ class MessageParser:
 
         self.grammar = dict(
             main=dict(
-                next={'show', 'add', 'delete', 'help', 'contest', 'city', 'category', 'gift', 'thanks', 'greeting'}
+                next={'add', 'delete', 'help', 'contest', 'city', 'category', 'gift'}
+            ),
+            secondary=dict(
+                next={'greeting', 'thanks'}
             ),
             thanks=dict(
                 keywords={'spasibo', 'blagodarit', 'sposibo', 'thank', 'thanks', 'krasava', 'molodec', 'spasibochki',
-                          'mersi', 'blagodarnost', 'blagodarstvovat', 'blagodarnyj', 'sesibon', 'sps'}
+                          'mersi', 'blagodarnost', 'blagodarstvovat', 'blagodarnyj', 'sesibon', 'sps', 'spasibok'}
             ),
             greeting=dict(
                 keywords={'privet', 'privetulya', 'dratut', 'darof', 'zdravstvovat', 'jou', 'ku', 'start', 'startovat',
                           'nachinat', 'pognat', 'nachalo', 'privetstvovat'}
             ),
-            show=dict(
-                keywords={'pokazyvat', 'poluchat', 'napisat', 'davat', 'posmotret', 'prosmatrivat', 'prosmotr',
-                          'nahodit', 'poisk', 'iskat', 'rasskazyvat', 'podelitsya', 'daya', 'prihodit', 'naidi',
-                          'prisylat', 'hotet', 'zhelat', 'zhazhda', 'vozhdelat'},
-                next={'contest', 'city', 'category', 'gift'}
-            ),
             add=dict(
-                keywords={'dobavlyat', 'vstavlyat', 'pribavlyat', 'prisoedinyat', 'otslezhivat', 'zakinut', 'sohranyat'}
+                keywords={'dobavlyat', 'vstavlyat', 'pribavlyat', 'prisoedinyat', 'otslezhivat', 'zakinut', 'sohranyat',
+                          'podpisyvatsya', 'podpisyvat', 'podkljuchat', 'podkljuchatsya', 'nachinat'}
             ),
             delete=dict(
-                keywords={'udal', 'ubirat', 'udalyat', 'steret', 'otstavlyat'}
+                keywords={'udal', 'ubirat', 'udalyat', 'steret', 'otstavlyat', 'otpisyvat', 'otpisyvatsya',
+                          'otkljuchat', 'otkljuchatsya', 'perestavat', 'prekrashhat'}
             ),
             help=dict(
                 keywords={'pomoshh', 'pomogat', 'instrukciya', 'help', 'komanda', 'funkciya', 'funkcional', 'umet'}
             ),
             contest=dict(
-                keywords={'konkurs', 'rozygrysh', 'lotereya', 'halyava'},
-                next={'city', 'category', 'gift'}
+                keywords={'konkurs', 'rozygrysh', 'lotereya', 'halyava', 'halyavnyj', 'besplatnyj', 'besplatno',
+                          'hotet', 'davat', 'razdavat', 'razygryvat', 'otdavat'}
             ),
             city=dict(
                 keywords={'gorod', 'derevnya', 'muhosransk'}
@@ -76,28 +75,33 @@ class MessageParser:
                     current = state
                     break
 
-        data = self.search_city(self.normalizer.filter(lemms))
-        if data:
-            target = 'city'
-        else:
-            data = self.search_category(self.normalizer.filter(lemms))
-            if data:
-                target = 'category'
-            else:
-                data = self.search_gift(message)
-                if data:
-                    target = 'gift'
-                else:
-                    target = None
+        result = dict(user_id=user_id, data=dict())
 
-        if target and command and command[0] == 'show':
-            command = ['show', 'contest', target]
-
-        result = dict(user_id=user_id)
         if command:
-            if target and command[-1] != target:
-                command.append(target)
             result['command'] = '_'.join(command)
-        result['data'] = ({target: data} if target else data) if data else None
+        else:
+            for key in self.grammar['secondary']['next']:
+                if self.grammar[key]['keywords'].intersection(lemms):
+                    command.append(key)
+            if command:
+                result['command'] = command
+
+        result['data']['city'] = self.search_city(self.normalizer.filter(lemms))
+        if not result['data']['city']:
+            del result['data']['city']
+        result['data']['category'] = self.search_category(self.normalizer.filter(lemms))
+        if not result['data']['category']:
+            del result['data']['category']
+        result['data']['gift'] = self.search_gift(message)
+        if not result['data']['gift']:
+            del result['data']['gift']
+
+        if result.get('command') == 'contest':
+            if 'city' not in result['data'] and self.grammar['city']['keywords'].intersection(lemms):
+                result['data']['city'] = list()
+            if 'category' not in result['data'] and self.grammar['category']['keywords'].intersection(lemms):
+                result['data']['category'] = list()
+            if 'gift' not in result['data'] and self.grammar['gift']['keywords'].intersection(lemms):
+                result['data']['gift'] = list()
 
         return result
