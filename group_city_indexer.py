@@ -66,7 +66,8 @@ if __name__ == '__main__':
                     if 'members_count' not in current or current['members_count'] < args.members:
                         continue
                     text = '%s %s %s' % (current.get('name'), current.get('status'), current.get('description'))
-                    group[current['id']] = cities[map(translit, normalizer.normalize(text))]
+                    text = (' '.join(normalizer.mystem.lemmatize(text))).replace('-', ' ').replace('–', ' ').split()
+                    group[current['id']] = cities[map(translit, filter(lambda x: x.isalpha(), text))]
                     if 'city' in current and current['city']['id'] not in group[current['id']]:
                         group[current['id']].append(current['city']['id'])
                 break

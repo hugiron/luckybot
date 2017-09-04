@@ -21,7 +21,7 @@ class MessageParser:
             ),
             greeting=dict(
                 keywords={'privet', 'privetulya', 'dratut', 'darof', 'zdravstvovat', 'jou', 'ku', 'start', 'startovat',
-                          'nachinat', 'pognat', 'nachalo', 'privetstvovat'}
+                          'nachinat', 'pognat', 'nachalo', 'privetstvovat', 'jo'}
             ),
             add=dict(
                 keywords={'dobavlyat', 'vstavlyat', 'pribavlyat', 'prisoedinyat', 'otslezhivat', 'zakinut', 'sohranyat',
@@ -81,10 +81,9 @@ class MessageParser:
             result['command'] = '_'.join(command)
         else:
             for key in self.grammar['secondary']['next']:
-                if self.grammar[key]['keywords'].intersection(lemms):
-                    command.append(key)
-            if command:
-                result['command'] = command
+                if self.grammar[key]['keywords'].intersection(map(translit, lemms)):
+                    result['command'] = key
+                    break
 
         result['data']['city'] = self.search_city(self.normalizer.filter(lemms))
         if not result['data']['city']:
@@ -95,6 +94,9 @@ class MessageParser:
         result['data']['gift'] = self.search_gift(message)
         if not result['data']['gift']:
             del result['data']['gift']
+
+        if result['data'] and 'command' not in result:
+            result['command'] = 'contest'
 
         if result.get('command') == 'contest':
             if 'city' not in result['data'] and self.grammar['city']['keywords'].intersection(lemms):
