@@ -263,10 +263,11 @@ class Handler:
                     if root_category in user_category:
                         user_category.remove(root_category)
                 else:
-                    for item in self.category.data[category]['child']:
-                        key = '%s:%s' % (category, item)
-                        if key in user_category:
-                            user_category.remove(key)
+                    if 'child' in self.category.data[category]:
+                        for item in self.category.data[category]['child']:
+                            key = '%s:%s' % (category, item)
+                            if key in user_category:
+                                user_category.remove(key)
                     user_category.remove(category)
                 count += 1
         user_category = list(user_category)

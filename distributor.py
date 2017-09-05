@@ -72,22 +72,29 @@ def calculate_factor(contests, access_token):
         for post in vk_api.wall.getById(posts=','.join(batch), access_token=access_token()):
             post_id = '%d_%d' % (post['owner_id'], post['id'])
             if post['owner_id'] in groups and groups[post['owner_id']]:
-                result[post_id] = post['reposts']['count'] / groups[post['owner_id']]
+                if 'views' in post:
+                    result[post_id] = post['views']['count'] / groups[post['owner_id']]
+                else:
+                    result[post_id] = post['reposts']['count'] / groups[post['owner_id']]
             else:
                 result[post_id] = 0
     return result
 
 
 def search_target_contest(user, contest_city, contest_category, contest_word):
+    def post_in_user_city(post_id):
+        return post_id not in contest_city or contest_city[post_id].intersection(user.city)
+
     result = set()
     if user.category:
         for category in user.category:
             if category in contest_category:
                 for post_id in contest_category[category]:
-                    if post_id not in contest_city or contest_city[post_id].intersection(user.city):
+                    if post_in_user_city(post_id):
                         result.add(post_id)
     else:
-        result = set([post_id for category, posts in contest_category.items() for post_id in posts])
+        result = set([post_id for category, posts in contest_category.items()
+                      for post_id in posts if post_in_user_city(post_id)])
     for gift in user.gift:
         keywords = normalizer.text_normalize(gift).split()
         is_full = True
@@ -97,7 +104,7 @@ def search_target_contest(user, contest_city, contest_category, contest_word):
             bag_words = list(map(lambda word: contest_word[word], keywords))
             if bag_words:
                 for post_id in reduce(lambda x, y: x.intersection(y), bag_words):
-                    if post_id not in contest_city or contest_city[post_id].intersection(user.city):
+                    if post_in_user_city(post_id):
                         result.add(post_id)
     return result
 

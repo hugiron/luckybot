@@ -36,7 +36,7 @@ class MessageParser:
             ),
             contest=dict(
                 keywords={'konkurs', 'rozygrysh', 'lotereya', 'halyava', 'halyavnyj', 'besplatnyj', 'besplatno',
-                          'hotet', 'davat', 'razdavat', 'razygryvat', 'otdavat'}
+                          'hotet', 'davat', 'razdavat', 'razygryvat', 'otdavat', 'poisk'}
             ),
             city=dict(
                 keywords={'gorod', 'derevnya', 'muhosransk'}
@@ -63,14 +63,14 @@ class MessageParser:
         message = self.normalizer.preprocess(message)
         command = list()
         lemms = self.normalizer.mystem.lemmatize(message)
+        translit_lemms = list(map(translit, lemms))
 
         for i in range(len(lemms)):
             if not lemms[i].isalpha() or 'next' not in self.grammar[current]:
                 continue
-            lex = translit(lemms[i])
 
             for state in self.grammar[current]['next']:
-                if lex in self.grammar[state]['keywords']:
+                if translit_lemms[i] in self.grammar[state]['keywords']:
                     command.append(state)
                     current = state
                     break
@@ -81,7 +81,7 @@ class MessageParser:
             result['command'] = '_'.join(command)
         else:
             for key in self.grammar['secondary']['next']:
-                if self.grammar[key]['keywords'].intersection(map(translit, lemms)):
+                if self.grammar[key]['keywords'].intersection(translit_lemms):
                     result['command'] = key
                     break
 
@@ -99,11 +99,11 @@ class MessageParser:
             result['command'] = 'contest'
 
         if result.get('command') == 'contest':
-            if 'city' not in result['data'] and self.grammar['city']['keywords'].intersection(lemms):
+            if 'city' not in result['data'] and self.grammar['city']['keywords'].intersection(translit_lemms):
                 result['data']['city'] = list()
-            if 'category' not in result['data'] and self.grammar['category']['keywords'].intersection(lemms):
+            if 'category' not in result['data'] and self.grammar['category']['keywords'].intersection(translit_lemms):
                 result['data']['category'] = list()
-            if 'gift' not in result['data'] and self.grammar['gift']['keywords'].intersection(lemms):
+            if 'gift' not in result['data'] and self.grammar['gift']['keywords'].intersection(translit_lemms):
                 result['data']['gift'] = list()
 
         return result
