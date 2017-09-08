@@ -1057,7 +1057,8 @@
     "title": "Тольятти",
     "id": 143,
     "tags": [
-      "tolyatti"
+      "tolyatti",
+      "tlt"
     ]
   },
   {
@@ -4961,8 +4962,6 @@
     "id": 2087,
     "tags": [
       "dubrovka",
-      "serebryanskoe s/p",
-      "dubrovka ( serebryanskij s / p )",
       "dubrovka serebryanskij"
     ]
   },
@@ -5854,13 +5853,6 @@
     "id": 2708,
     "tags": [
       "bajkalsk"
-    ]
-  },
-  {
-    "title": "Зима",
-    "id": 2716,
-    "tags": [
-      "zima"
     ]
   },
   {

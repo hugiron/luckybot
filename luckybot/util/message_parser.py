@@ -55,8 +55,23 @@ class MessageParser:
     def search_category(self, text):
         return self.category[text]
 
-    def search_gift(self, text):
-        return [value for key, value in enumerate(text.replace('`', '"').replace('\'', '"').split('"')) if key % 2]
+    def search_gift(self, text, lemms):
+        def search_implicit():
+            gifts = self.category.gifts
+            current_gift = []
+            for lex in lemms:
+                if lex not in gifts and current_gift:
+                    yield ' '.join(current_gift)
+                    gifts = self.category.gifts
+                    current_gift = []
+                if lex in gifts:
+                    current_gift.append(lex)
+                    gifts = gifts[lex]
+            if current_gift:
+                yield ' '.join(current_gift)
+
+        return [value for key, value in enumerate(text.replace('`', '"').replace('\'', '"').split('"')) if key % 2] + \
+               list(search_implicit())
 
     def parse(self, message, user_id):
         current = 'main'
@@ -64,6 +79,7 @@ class MessageParser:
         command = list()
         lemms = self.normalizer.mystem.lemmatize(message)
         translit_lemms = list(map(translit, lemms))
+        filter_lemms = self.normalizer.filter(lemms)
 
         for i in range(len(lemms)):
             if not lemms[i].isalpha() or 'next' not in self.grammar[current]:
@@ -85,13 +101,13 @@ class MessageParser:
                     result['command'] = key
                     break
 
-        result['data']['city'] = self.search_city(self.normalizer.filter(lemms))
+        result['data']['city'] = self.search_city(filter_lemms)
         if not result['data']['city']:
             del result['data']['city']
-        result['data']['category'] = self.search_category(self.normalizer.filter(lemms))
+        result['data']['category'] = self.search_category(filter_lemms)
         if not result['data']['category']:
             del result['data']['category']
-        result['data']['gift'] = self.search_gift(message)
+        result['data']['gift'] = self.search_gift(message, filter_lemms)
         if not result['data']['gift']:
             del result['data']['gift']
 

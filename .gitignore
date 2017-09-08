@@ -4,3 +4,5 @@ data/
 resources/
 temp/
 log/
+*.ipynb
+.ipynb_checkpoints/

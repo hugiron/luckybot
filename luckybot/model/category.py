@@ -7,6 +7,14 @@ class CategoryModel:
         self.vocab = dict()
         self.keywords = dict()
         self.categories = list()
+
+        self.gifts = dict()
+        def add_gift(gift_name, gifts):
+            if gift_name:
+                if gift_name[0] not in gifts:
+                    gifts[gift_name[0]] = dict()
+                add_gift(gift_name[1:], gifts[gift_name[0]])
+
         for first in data:
             data[first]['tags'] = set(data[first]['tags'])
             self.categories.append((0, first, data[first]['title']))
@@ -26,6 +34,8 @@ class CategoryModel:
                         if word not in self.vocab:
                             self.vocab[word] = list()
                         self.vocab[word].append(category_id)
+            for keyword in self.keywords[first]:
+                add_gift(keyword.split(), self.gifts)
         self.data = data
 
     def __getitem__(self, sentence):

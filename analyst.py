@@ -25,7 +25,7 @@ def parse_args():
                         help='Prefix of file with output dataset')
     parser.add_argument('-m', '--model', type=str, default='objects/bayes.model',
                         help='Path to Naive Bayes model')
-    parser.add_argument('-g', '--group', type=str, default='objects/group.model',
+    parser.add_argument('-g', '--group', type=str, default='objects/group_city.model',
                         help='Path to model with pairs from group_id and city_id')
     parser.add_argument('--group_meta', type=str, default='objects/group_meta.model',
                         help='Path to model with approved groups and screen names')

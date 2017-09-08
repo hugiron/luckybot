@@ -1,5 +1,4 @@
-@monthly cd ~/luckybot && python3 group_city_indexer.py
-@weekly cd ~/luckybot && python3 group_meta_indexer.py
+@monthly cd ~/luckybot && python3 group_indexer.py
 
 @reboot cd ~/luckybot && python3 bot.py
 @reboot cd ~/luckybot && python3 landing.py
