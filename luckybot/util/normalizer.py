@@ -6,6 +6,7 @@ from pymystem3 import Mystem
 class Normalizer:
     def __init__(self):
         vk_url = r'(https?:\/\/)?vk\.com\/[\d\w\.\_]+'
+        vk_link = r'\[(club|id)\d+\|[^\]]+\]'
         vk_group = r'\[club\d+\|[^\]]+\]'
         vk_user = r'\[id\d+\|[^\]]+\]'
         url = r'(https?:\/\/)?[-a-zA-Z0-9@:%._\+~#=]{1,256}\.[a-z]{2,6}\b([-a-zA-Z0-9@:%_\+.~#?&//=]*)'
@@ -15,6 +16,7 @@ class Normalizer:
                r'(понедельник|вторник|среда|четверг|пятница|суббота|воскресенье)'
 
         self.vk_url_regex = re.compile(vk_url)
+        self.vk_link_regex = re.compile(vk_link)
         self.vk_group_regex = re.compile(vk_group)
         self.vk_user_regex = re.compile(vk_user)
         self.url_regex = re.compile(url)
@@ -53,7 +55,8 @@ class Normalizer:
                ['{date}'] * date_count + ['{vk_url}'] * vk_url_count + ['{url}'] * url_count
 
     def text_normalize(self, text):
-        return ''.join(self.mystem.lemmatize(self.preprocess(text))[:-1])
+        return self.vk_link_regex.sub('', ''.join(filter(lambda item: item not in self.stopwords,
+                                                         self.mystem.lemmatize(self.preprocess(text))[:-1])))
 
     def preprocess(self, text):
         text = text.lower()

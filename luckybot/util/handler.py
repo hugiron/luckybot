@@ -361,7 +361,8 @@ class Handler:
         if 'category' in data:
             query_or.append({'category': {'$in': data['category']}})
         if 'gift' in data:
-            query_or.append({'$text': {'$search': ' '.join(data['gift']), '$language': 'ru'}})
+            text_search = '"%s"' % data['gift'][0] if len(data['gift']) == 1 else ' '.join(data['gift'])
+            query_or.append({'$text': {'$search': text_search, '$language': 'ru'}})
 
         query_and = [
             {'date': {'$gte': current_date}},
@@ -458,6 +459,7 @@ class Handler:
         user_gift = list(map(lambda item: self.normalizer.text_normalize(item), user_gift))
         random.shuffle(user_gift)
         current_date = datetime.datetime.combine(datetime.date.today(), datetime.datetime.min.time())
+        text_search = '"%s"' % user_gift[0] if len(user_gift) == 1 else ' '.join(user_gift)
         cursor = self.db.contest.aggregate(
             [
                 {
@@ -470,7 +472,7 @@ class Handler:
                                     {
                                         '$text':
                                             {
-                                                '$search': ' '.join(user_gift),
+                                                '$search': text_search,
                                                 '$language': 'ru'
                                             }
                                     },

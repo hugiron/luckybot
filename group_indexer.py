@@ -63,7 +63,7 @@ if __name__ == '__main__':
                 if not begin_id < end_id:
                     break
                 data = api.groups.getById(group_ids=','.join(map(str, range(begin_id, end_id))),
-                                          fields='members_count,description,status,city', access_token=access_token())
+                                          fields='members_count,city', access_token=access_token())
 
                 for current in data:
                     begin_id = current['id'] + 1
@@ -73,7 +73,7 @@ if __name__ == '__main__':
                     group_meta.add(current['id'], current.get('screen_name'))
 
                     # Сохранение данных в модель с информацией о геолокации сообществ
-                    text = '%s %s %s' % (current.get('name'), current.get('status'), current.get('description'))
+                    text = '%s' % (current.get('name'))
                     text = (' '.join(normalizer.mystem.lemmatize(text))).replace('-', ' ').replace('–', ' ').split()
                     group_city[current['id']] = cities[map(translit, filter(lambda x: x.isalpha(), text))]
                     if 'city' in current and current['city']['id'] not in group_city[current['id']]:
