@@ -101,7 +101,8 @@ class MessageParser:
                     result['command'] = key
                     break
 
-        result['data']['city'] = self.search_city(filter_lemms)
+        city_lemms = (' '.join(lemms)).replace('-', ' ').replace('–', ' ').split()
+        result['data']['city'] = self.search_city(city_lemms)
         if not result['data']['city']:
             del result['data']['city']
         result['data']['category'] = self.search_category(filter_lemms)

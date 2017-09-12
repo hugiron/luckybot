@@ -18,7 +18,7 @@ def parse_args():
     parser = argparse.ArgumentParser()
     parser.add_argument('-t', '--tokens', type=str, default='objects/access_token.json',
                         help='Path to file with access tokens for VK API')
-    parser.add_argument('-n', '--number', type=int, default=100,
+    parser.add_argument('-n', '--number', type=int, default=32,
                         help='The number of contests that are sent out daily to moderators')
     return parser.parse_args()
 

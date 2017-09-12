@@ -135,7 +135,7 @@ if __name__ == '__main__':
     except Exception as msg:
         logging.error(str(msg))
 
-    for user in User.objects():
+    for user in User.objects(is_member=True):
         try:
             user_contest = list(map(lambda item: (item, contest_factor[item] if item in contest_factor else 0),
                                     search_target_contest(user, contest_city, contest_category, contest_word)))
